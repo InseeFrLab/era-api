@@ -8,6 +8,7 @@ import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -23,6 +24,13 @@ public class GlobalExceptionsHandlers {
         log.error("exceptionBaseDeDonnee  : ",exception);
         return new ResponseEntity<>("Erreur d'accès aux bases de données du RP ", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler({AccessDeniedException.class})
+    public ResponseEntity<String> accessRefuse(final HttpServletRequest req, final AccessDeniedException exception) {
+        log.error("accessRefuse  : ",exception);
+        return new ResponseEntity<>("Accès refusé", HttpStatus.FORBIDDEN);
+    }
+
 
     @ExceptionHandler({IOException.class})
     public ResponseEntity<String> exceptionEntreeSortie(final HttpServletRequest req, final IOException exception) {
