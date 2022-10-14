@@ -84,6 +84,13 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.keycloak.bom</groupId>
+            <artifactId>keycloak-adapter-bom</artifactId>
+            <version>19.0.3</version>
+            <type>pom</type>
+        </dependency>
+
     </dependencies>
 
 

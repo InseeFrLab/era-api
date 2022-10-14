@@ -213,7 +213,8 @@ import java.util.stream.Collectors;
                         //parents de l'individu (triés du plus vieux au plus jeune : règle métier)
                         //TODO : mettre un TU sur le tri
                         List<Long> parents = lienEnfantByIndividuId.get(biId);
-                        BIEntity parent1=null, parent2 = null;
+                        BIEntity parent1=null;
+                        BIEntity parent2 = null;
 
                         if(parents!=null){
                                 if(parents.size()>=2){

@@ -183,8 +183,6 @@ import java.util.stream.Collectors;
                 }
         }
 
-        // on a besoin du @Transactional pour que toutes les requêtes soient exécutées par la même session où on crée la table temporaire.
-        @Transactional
         protected List<Pair<Long, String>> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) {
 
                 jdbc.execute("DROP TABLE IF EXISTS tmp_rem_communes_a_traiter ");
@@ -250,8 +248,8 @@ import java.util.stream.Collectors;
 
                         List<Long> liste2X = biIdList;
                         liste2X.addAll(biIdList);
-
-                        var liensList = jdbcTemplate.query(sqlLien, liste2X.toArray(), (rs, i) -> Triple.of(rs.getLong(1), rs.getLong(2), rs.getLong(3)));
+                        var liensList = jdbcTemplate.query(sqlLien,  (rs, i) -> Triple.of(rs.getLong(1), rs.getLong(2), rs.getLong(3)),
+                            liste2X.toArray(Long[]::new));
 
                         for (Triple<Long, Long, Long> lien : liensList) {
                                 Long middle = lien.getMiddle();
