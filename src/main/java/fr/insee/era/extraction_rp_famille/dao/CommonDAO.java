@@ -4,7 +4,9 @@ import fr.insee.era.extraction_rp_famille.configuration.ParametrageConfiguration
 import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
+import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import fr.insee.era.extraction_rp_famille.model.mapper.BIEntityMapper;
+import fr.insee.era.extraction_rp_famille.model.mapper.RIMDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 
 import java.sql.Date;
@@ -167,15 +168,19 @@ import java.util.stream.Collectors;
             LinkedMultiValueMap<Long, Long> inoutLienParentByIndividuId,
             LinkedMultiValueMap<Long, Long> inoutLienEnfantByIndividuId);
 
-        public abstract Triple<String,String,String> getRim(Long rimId);
+        public abstract RIMDto getRim(Long rimId);
 
         //TODO : Commenter que ca renvoi null si on trouve rien
-        protected  Triple<String,String,String> getRim(Long rimId, JdbcTemplate jdbc){
+        protected RIMDto getRim(Long rimId, JdbcTemplate jdbc){
+
                 try{
-                        return jdbc.queryForObject("SELECT numvoiloc||' '||typevoiloc||' '||nomvoiloc||' '||cpostloc||' '||cloc"
-                            + ", identifiant , codedepartement||codecommune "
-                            +"  FROM reponseinternetmenages "
-                            +" where id=?", (rs, rowNum) ->  Triple.of(rs.getString(1), rs.getString(2), rs.getString(3)),rimId);
+
+                        return jdbc.queryForObject("SELECT numvoiloc||' '||typevoiloc||' '||nomvoiloc||' '||cpostloc||' '||cloc as adresse"
+                            + ", rim.identifiant , codedepartement||codecommune as code_commune_complet, mail "
+                            +"  FROM reponseinternetmenages rim, internautes i "
+                            +" where rim.idinternaute  = i.id and rim.id=?", new RIMDtoMapper(),rimId);
+
+
                 }
                 catch (        EmptyResultDataAccessException e) {
                         //La RIM n'existe pas dans cette base

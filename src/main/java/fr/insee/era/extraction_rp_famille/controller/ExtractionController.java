@@ -54,7 +54,7 @@ public class ExtractionController {
 
         @GetMapping(value="/getColemanJsonsForUe")
         public ResponseEntity<ObjectNode>  getColemanJsonsForUe(@RequestParam("ueId") Long ueId, @RequestParam("questionnaireId") String questionnaireId) throws Exception {
-                log.info("getAllUeForPeriod utilisateur={} ueId={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
+                log.info("getColemanJsonsForUe utilisateur={} ueId={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getDataForRim(ueId,questionnaireId));
         }
 }

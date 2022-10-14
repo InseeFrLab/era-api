@@ -84,19 +84,16 @@ import java.util.stream.Collectors;
                 if(rimDetails==null){
                         throw new RimInconnueException(idRim);
                 }
-                String rimAdresse = rimDetails.getLeft();
-                String rimIdentifiantInternet = rimDetails.getMiddle();
-                String identifiantCommune = rimDetails.getRight();
 
                 Constantes.BI_SEXE sexe;
-                if(parametrageProperties.getCommunesFemmes().contains(identifiantCommune)){
+                if(parametrageProperties.getCommunesFemmes().contains(rimDetails.getCodeCommune())){
                         sexe=Constantes.BI_SEXE.BI_SEXE_FEMME;
                 }
-                else if(parametrageProperties.getCommunesHommes().contains(identifiantCommune)){
+                else if(parametrageProperties.getCommunesHommes().contains(rimDetails.getCodeCommune())){
                         sexe=Constantes.BI_SEXE.BI_SEXE_HOMME;
                 }
                 else{
-                        throw new CommuneInconnueException(identifiantCommune);
+                        throw new CommuneInconnueException(rimDetails.getCodeCommune());
                 }
 
 
@@ -104,14 +101,14 @@ import java.util.stream.Collectors;
                 ObjectNode resultat  = jacksonObjectMapper.createObjectNode();
 
                 //Json pour Coleman questionnaire
-                ObjectNode jsonQuestionnaire=computeColemanQuestionnaireReponse(idRim,sexe,biEntityById,conjointByIndividuID,inoutLienParentByIndividuId,inoutLienEnfantByIndividuId);
+                ObjectNode jsonQuestionnaire=computeColemanQuestionnaireReponse(idRim,sexe,rimDetails.getCourriel(),biEntityById,conjointByIndividuID,inoutLienParentByIndividuId,inoutLienEnfantByIndividuId);
                 jsonQuestionnaire.put("questionnaireId", questionnaireId );
                 jsonQuestionnaire.set("personalization",jacksonObjectMapper.createObjectNode() );
                 jsonQuestionnaire.set("comment", jacksonObjectMapper.createObjectNode());
                 jsonQuestionnaire.set("stateData", jacksonObjectMapper.createObjectNode());
 
                 //Json pour coleman pilotage
-                ObjectNode jsonPilotage=computeColemanPilotageReponse(idRim,rimAdresse,rimIdentifiantInternet,questionnaireId);
+                ObjectNode jsonPilotage=computeColemanPilotageReponse(idRim,rimDetails.getAddresse(), rimDetails.getIdentifiantInternet(), questionnaireId);
 
                 resultat.set("questionnaire",jsonQuestionnaire);
                 resultat.set("pilotage",jsonPilotage);
@@ -133,7 +130,7 @@ import java.util.stream.Collectors;
 
         private ObjectNode computeColemanQuestionnaireReponse(
             Long idRim,
-            Constantes.BI_SEXE sexe, HashMap<Long, BIEntity> biEntityById,
+            Constantes.BI_SEXE sexe, String courriel, HashMap<Long, BIEntity> biEntityById,
             HashMap<Long, Long> conjointByIndividuID,
             LinkedMultiValueMap<Long, Long> lienParentByIndividuId,
             LinkedMultiValueMap<Long, Long> lienEnfantByIndividuId) throws Exception {
@@ -165,7 +162,7 @@ import java.util.stream.Collectors;
                 dataNode.set("EXTERNAL",externalNode);
                 externalNode.put("RPNBQUEST",biEnquetes.size());
                 externalNode.put("RPTYPEQUEST",sexe.toFullString());
-
+                externalNode.put("MailReferent",courriel);
                 ArrayNode listePrenomNode = jacksonObjectMapper.createArrayNode();
                 String listePrenom = String.join(", ",biEnquetes.stream().map(BIEntity::getPrenom).collect(Collectors.toList()));
                 for (int i = 0; i<biEnquetes.size(); i++){

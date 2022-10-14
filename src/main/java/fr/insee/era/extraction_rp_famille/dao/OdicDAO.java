@@ -3,9 +3,9 @@ package fr.insee.era.extraction_rp_famille.dao;
 import fr.insee.era.extraction_rp_famille.configuration.OdicDataSourceConfiguration;
 import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
+import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -68,7 +68,7 @@ public class OdicDAO extends CommonDAO{
                 return getBiEtLiensForRim(rimId, jdbcTemplate1, inoutConjointByIndividuID, inoutLienParentByIndividuId,inoutLienEnfantByIndividuId);
         }
 
-        @Override public Triple<String,String,String> getRim(Long rimId) {
+        @Override public RIMDto getRim(Long rimId) {
 
                 JdbcTemplate jdbcTemplate1 = new JdbcTemplate(conf.odicDataSource());
 
