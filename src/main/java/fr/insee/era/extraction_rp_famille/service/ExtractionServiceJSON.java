@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
                 HashMap<Long, ReponseListeUEDto> reponseByIdRim = new HashMap<>();
 
-                //TODO: on a une méthode pour récupérer directement un stream
                 var listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
                 listeOMER.stream().forEach(pair -> reponseByIdRim.put(pair.getLeft(),new ReponseListeUEDto(pair.getLeft(),pair.getRight())));
 

@@ -28,138 +28,7 @@ import java.util.stream.Collectors;
 
         BDDSource bddSource; // A définir dans les sous classes
         @Autowired ParametrageConfiguration parametrageProperties;
-/*
-        //A implémenter dans les sous classes
-        public abstract void getBiEtLiensForRims(
-            Collection<Long> rimKeys,
-            List<BIEntity> outListOfBI,
-            LinkedMultiValueMap<Long, Long> inoutConjointByIndividuID,
-            LinkedMultiValueMap<Long, Long> inoutParentByIndividuID,
-            LinkedMultiValueMap<Long, Long> inoutEnfantByIndividuID);
 
-        public abstract Long getMaxNbEnfant();
-
-        public abstract Long getMaxNbAdulteMemeSexe();
-
-        public abstract List<RIMEntity> getAllRIMForSexe(Date dateDebut, Date dateFin, Constantes.BI_SEXE sexe);
-
-        protected Long getMaxNbEnfant(JdbcTemplate jdbcTemplate) {
-                String sql = "select count(*) as nb from lienindividus l " + " where  l.lienenregistre  = " + Constantes.LIEN_PARENT
-                    + " group by individu, lienenregistre" + " order by count(*) desc " + " limit 1";
-
-                List<Long> longList = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong(1));
-                return (longList.isEmpty()) ? 0l : longList.get(0);
-        }
-
-        protected Long getMaxNbAdulteMemeSexe(JdbcTemplate jdbcTemplate) {
-
-                String sql = " select count(*) as nb " + " from bulletinindividuels b " + " where anai <= '" + Constantes.ANNEE_NAISSANCE_MAJEUR + "'"
-                    + " group by b.feuillelogement , b.sexe " + " order by count(*) desc " + " limit 1";
-
-                List<Long> longList = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong(1));
-                return (longList.isEmpty()) ? 0l : longList.get(0);
-        }
-
-        protected List<RIMEntity> getAllRIMForSexe(Date dateDebut, Date dateFin, JdbcTemplate jdbc, Constantes.BI_SEXE sexe) {
-
-                //TODO : pourquoi ca disparait à un moment la table temporaire?
-                jdbc.execute("DROP TABLE IF EXISTS tmp_rem_communes_a_traiter ");
-                jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_rem_communes_a_traiter (id varchar(255) NOT NULL)");
-
-                List<Object[]> codesCommunes = new ArrayList<>();
-                switch (sexe) {
-                        case BI_SEXE_HOMME: {
-                                log.info("SEXE=HOMMES");
-                                for (String id : parametrageProperties.getCommunesHommes()) {
-                                        codesCommunes.add(new Object[] { id });
-                                }
-                        }
-                        break;
-                        case BI_SEXE_FEMME: {
-                                log.info("SEXE=FEMMES");
-                                for (String id : parametrageProperties.getCommunesFemmes()) {
-                                        codesCommunes.add(new Object[] { id });
-                                }
-                        }
-                        break;
-                }
-
-                log.info("Insertion dans la table temporaire des communes ");
-                jdbc.batchUpdate("INSERT INTO tmp_rem_communes_a_traiter VALUES(?)", codesCommunes);
-                log.info("Recuperation des RIMs ");
-
-                //TODO a supprimer (c'est juste du log)
-                var tmp = jdbc.queryForList("SELECT id FROM tmp_rem_communes_a_traiter", String.class);
-                log.info("tmp_rem_communes_a_traiter=" + ((tmp.size() > 10) ? (tmp.subList(0, 10) + "...") : tmp));
-
-                String sql = "select id, numvoiloc , typevoiloc ,nomvoiloc , cpostloc, cloc from reponseinternetmenages" + " where dateenvoi between ? and ?"
-                    + " and codedepartement||codecommune  in (SELECT id FROM tmp_rem_communes_a_traiter) ";
-
-                Timestamp debutTS = new Timestamp(dateDebut.getTime());
-                Timestamp finTS = new Timestamp(dateFin.getTime());
-
-                log.info("Récupération des rims entre " + debutTS + " et " + finTS);
-                List list1 = jdbc.query(sql, new Object[] { debutTS, finTS }, new int[] { Types.TIMESTAMP, Types.TIMESTAMP }, new RIMEntityMapper(bddSource));
-
-                jdbc.execute("TRUNCATE tmp_rem_communes_a_traiter");
-                return list1;
-        }
-
-        protected void getBiEtLiensForRims(
-            Collection<Long> rimKeys,
-            JdbcTemplate jdbcTemplate,
-            List<BIEntity> outListOfBI,
-            LinkedMultiValueMap<Long, Long> inoutConjointByIndividuID,
-            LinkedMultiValueMap<Long, Long> inoutParentByIndividuID,
-            LinkedMultiValueMap<Long, Long> inoutEnfantByIndividuID) {
-                //TODO : tableauabcd filtrer. Juste sur les enquêtes ou aussi sur les enfants??
-
-                //TODO : WTF la table temporaire disparait à un moment avec CREATE TEMPORARY TABLE IF NOT EXISTS
-                jdbcTemplate.execute("DROP TABLE IF EXISTS tmp_rem_rim_id");
-                jdbcTemplate.execute("CREATE TEMPORARY TABLE tmp_rem_rim_id (id INT8 NOT NULL)");
-
-                List<Object[]> rimIds = new ArrayList<>();
-                for (Long id : rimKeys) {
-                        rimIds.add(new Object[] { id });
-                }
-
-                //TODO : faire ca en batch de 100 ou 1000?
-                log.info("Insertion dans la table temporaire ");
-                jdbcTemplate.batchUpdate("INSERT INTO tmp_rem_rim_id VALUES(?)", rimIds);
-                log.info("Recuperation des BI ");
-
-                String sqlLiens =
-                    " with bi as ( " + "         select id from bulletinindividuels b " + "         where b.feuillelogement IN (SELECT id FROM tmp_rem_rim_id) "
-                        + "         and tableauabcd='A' " //A : occupants permanents
-                        + "    )   " + "    select individu,lienenregistre,individurelie from lienindividus " + "    where individu in (select id from bi) "
-                        + "    and lienenregistre in (1,2,3) ";
-
-                var listOfLiens = jdbcTemplate.query(sqlLiens, (rs, i) -> Triple.of(rs.getLong(1), rs.getLong(2), rs.getLong(3)));
-
-                for (Triple<Long, Long, Long> lien : listOfLiens) {
-                        Long middle = lien.getMiddle();
-                        if (middle == Constantes.LIEN_CONJOINT) {
-                                //En base on a toujours 2 entrées (en mirroir)
-                                inoutConjointByIndividuID.add(lien.getRight(), lien.getLeft());
-                        }
-                        else if (middle == Constantes.LIEN_PARENT) {
-                                //individu est le parent de individurelie
-                                inoutParentByIndividuID.add(lien.getRight(), lien.getLeft());
-                        }
-                        else // if (middle == Constantes.LIEN_ENFANT) {
-                                //individu est un enfant de individurelie
-                                inoutEnfantByIndividuID.add(lien.getRight(), lien.getLeft());
-                }
-
-                outListOfBI.addAll(jdbcTemplate.query("SELECT id,nom,prenom, anai, sexe, feuillelogement " + " FROM bulletinindividuels b"
-                    + " WHERE feuillelogement IN (SELECT id FROM tmp_rem_rim_id) ", new BIEntityMapper(bddSource)));
-
-                //TODO : si on reste sur un create or replace temporary, alors ca ne sert à rien
-                jdbcTemplate.update("TRUNCATE  TABLE tmp_rem_rim_id");
-                log.info("getBiEtLiensForRims: outListOfBI.size=" + outListOfBI.size());
-                return;
-        }
-*/
         //-------------------------------------------------POUR JSON et COLEMAN----------------------------------------------------------//
         public abstract List<Pair<Long, String>> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin);
         public abstract List<BIEntity> getBiEtLiensForRim(
@@ -168,9 +37,12 @@ import java.util.stream.Collectors;
             LinkedMultiValueMap<Long, Long> inoutLienParentByIndividuId,
             LinkedMultiValueMap<Long, Long> inoutLienEnfantByIndividuId);
 
+        /**
+         * Récupération des infos d'une RIM en base
+         * @param rimId
+         * @return le DTO ou Null si rimId n'existe pas en base
+         */
         public abstract RIMDto getRim(Long rimId);
-
-        //TODO : Commenter que ca renvoi null si on trouve rien
         protected RIMDto getRim(Long rimId, JdbcTemplate jdbc){
 
                 try{

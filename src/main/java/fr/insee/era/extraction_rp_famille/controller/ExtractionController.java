@@ -24,27 +24,11 @@ import java.util.Collection;
 @SecurityRequirement(name = "keycloak")
 public class ExtractionController {
 
-//        @Autowired ExtractionServiceCSV extractionServiceCSV;
         @Autowired ExtractionServiceJSON extractionServiceJSON;
 
 
         @Autowired AccessToken accessToken;
-/*
-        @GetMapping(value="/csv" , produces = "text/csv")
-        public ResponseEntity<Resource>  getALLCSV(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin)
-            throws IOException, DataAccessException {
-                File csvFile = extractionServiceCSV.extraireTOUTEtEcrire(dateDebut, dateFin);
-                Resource resource = new FileSystemResource(csvFile);
 
-                String fileName = "extraction"+dateDebut+"_"+dateFin+".csv";
-                return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+fileName)
-                    .contentType(MediaType.parseMediaType("text/csv"))
-                    .body(resource);
-        }
-*/
-  //      @PreAuthorize("isAuthenticated()")
- //       @RolesAllowed("user")
         @GetMapping(value="/getAllUeForPeriod")
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllUeForPeriodALLJSON(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin)
             throws DataAccessException {

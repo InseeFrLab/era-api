@@ -25,31 +25,6 @@ public class OdicDAO extends CommonDAO{
         @Autowired
         private OdicDataSourceConfiguration conf;
 
-      /*  public List<RIMEntity> getAllRIMForSexe(Date dateDebut, Date dateFin, Constantes.BI_SEXE sexe) {
-                return getAllRIMForSexe(dateDebut,dateFin,jdbcTemplate1,sexe);
-        }
-
-        @Override
-        public void getBiEtLiensForRims(Collection<Long> rimKeys, List<BIEntity> outListOfBI,
-            LinkedMultiValueMap<Long,Long> inoutConjointByIndividuID,
-            LinkedMultiValueMap<Long,Long> inoutParentByIndividuID,
-            LinkedMultiValueMap<Long,Long> inoutEnfantByIndividuID) {
-                log.info("getAllBLetBI ODIC");
-                getBiEtLiensForRims(rimKeys, jdbcTemplate1, outListOfBI, inoutConjointByIndividuID,inoutParentByIndividuID,inoutEnfantByIndividuID);
-                return;
-        }
-
-        @Override public Long getMaxNbEnfant() {
-              return  getMaxNbEnfant(jdbcTemplate1);
-        }
-
-        @Override public Long getMaxNbAdulteMemeSexe() {
-                return getMaxNbAdulteMemeSexe(jdbcTemplate1);
-        }*/
-
-
-        //-------------------------------------------------POUR JSON et COLEMAN----------------------------------------------------------//
-
         public List<Pair<Long,String>> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin){
                 log.info("getIdRIMetInternetForPeriod ODIC");
 
