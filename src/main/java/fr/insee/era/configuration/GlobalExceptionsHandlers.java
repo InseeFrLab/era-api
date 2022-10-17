@@ -1,4 +1,4 @@
-package fr.insee.era.extraction_rp_famille.controller;
+package fr.insee.era.configuration;
 
 import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueException;
 import fr.insee.era.extraction_rp_famille.model.exception.PasDeBIDuBonSexeException;
