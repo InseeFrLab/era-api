@@ -3,6 +3,7 @@ package fr.insee.era.extraction_rp_famille.controller;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.service.ExtractionServiceJSON;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessToken;
@@ -33,6 +34,7 @@ public class ExtractionController {
   //      @PreAuthorize("isAuthenticated()")
  //       @RolesAllowed("user")
         @GetMapping(value="/survey-units-for-period")
+        @Operation(summary = "Récupération des répondants aux RP d'une période")
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
             throws DataAccessException {
                 log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
@@ -40,6 +42,7 @@ public class ExtractionController {
         }
 
         @GetMapping(value="/{id}")
+        @Operation(summary = "Récupération d'une unité enquêtée par son identifiant")
         public ResponseEntity<ObjectNode>  getSU(@PathVariable("id") Long ueId, @RequestParam("idCampaign ") String questionnaireId) throws Exception {
                 log.info("getSU utilisateur={} id={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getDataForRim(ueId,questionnaireId));
