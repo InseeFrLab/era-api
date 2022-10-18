@@ -20,7 +20,7 @@ import java.util.Collection;
 
 @RestController
 @Slf4j
-@RequestMapping("/extraction")
+@RequestMapping("/extraction-survey-unit")
 @SecurityRequirement(name = "keycloak")
 public class ExtractionController {
 
@@ -29,32 +29,19 @@ public class ExtractionController {
 
 
         @Autowired AccessToken accessToken;
-/*
-        @GetMapping(value="/csv" , produces = "text/csv")
-        public ResponseEntity<Resource>  getALLCSV(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin)
-            throws IOException, DataAccessException {
-                File csvFile = extractionServiceCSV.extraireTOUTEtEcrire(dateDebut, dateFin);
-                Resource resource = new FileSystemResource(csvFile);
 
-                String fileName = "extraction"+dateDebut+"_"+dateFin+".csv";
-                return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+fileName)
-                    .contentType(MediaType.parseMediaType("text/csv"))
-                    .body(resource);
-        }
-*/
   //      @PreAuthorize("isAuthenticated()")
  //       @RolesAllowed("user")
-        @GetMapping(value="/getAllUeForPeriod")
-        public ResponseEntity<Collection<ReponseListeUEDto>>  getAllUeForPeriodALLJSON(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin)
+        @GetMapping(value="/survey-units-for-period")
+        public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
             throws DataAccessException {
-                log.info("getAllUeForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
+                log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getAllRimForPeriod(dateDebut, dateFin));
         }
 
-        @GetMapping(value="/getColemanJsonsForUe")
-        public ResponseEntity<ObjectNode>  getColemanJsonsForUe(@RequestParam("ueId") Long ueId, @RequestParam("questionnaireId") String questionnaireId) throws Exception {
-                log.info("getColemanJsonsForUe utilisateur={} ueId={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
+        @GetMapping(value="/{id}")
+        public ResponseEntity<ObjectNode>  getSU(@PathVariable("id") Long ueId, @RequestParam("idCampaign ") String questionnaireId) throws Exception {
+                log.info("getSU utilisateur={} id={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getDataForRim(ueId,questionnaireId));
         }
 }
