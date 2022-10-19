@@ -25,7 +25,6 @@ import java.util.Collection;
 @SecurityRequirement(name = "keycloak")
 public class ExtractionController {
 
-//        @Autowired ExtractionServiceCSV extractionServiceCSV;
         @Autowired ExtractionServiceJSON extractionServiceJSON;
 
 
