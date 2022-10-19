@@ -3,6 +3,7 @@ package fr.insee.era.extraction_rp_famille.controller;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.service.ExtractionServiceJSON;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessToken;
@@ -20,25 +21,30 @@ import java.util.Collection;
 
 @RestController
 @Slf4j
-@RequestMapping("/extraction")
+@RequestMapping("/extraction-survey-unit")
 @SecurityRequirement(name = "keycloak")
 public class ExtractionController {
 
+//        @Autowired ExtractionServiceCSV extractionServiceCSV;
         @Autowired ExtractionServiceJSON extractionServiceJSON;
 
 
         @Autowired AccessToken accessToken;
 
-        @GetMapping(value="/getAllUeForPeriod")
-        public ResponseEntity<Collection<ReponseListeUEDto>>  getAllUeForPeriodALLJSON(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin)
+  //      @PreAuthorize("isAuthenticated()")
+ //       @RolesAllowed("user")
+        @GetMapping(value="/survey-units-for-period")
+        @Operation(summary = "Récupération des répondants aux RP d'une période")
+        public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
             throws DataAccessException {
-                log.info("getAllUeForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
+                log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getAllRimForPeriod(dateDebut, dateFin));
         }
 
-        @GetMapping(value="/getColemanJsonsForUe")
-        public ResponseEntity<ObjectNode>  getColemanJsonsForUe(@RequestParam("ueId") Long ueId, @RequestParam("questionnaireId") String questionnaireId) throws Exception {
-                log.info("getColemanJsonsForUe utilisateur={} ueId={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
+        @GetMapping(value="/{id}")
+        @Operation(summary = "Récupération d'une unité enquêtée par son identifiant")
+        public ResponseEntity<ObjectNode>  getSU(@PathVariable("id") Long ueId, @RequestParam("idCampaign ") String questionnaireId) throws Exception {
+                log.info("getSU utilisateur={} id={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getDataForRim(ueId,questionnaireId));
         }
 }
