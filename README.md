@@ -37,9 +37,14 @@ params :
     [
         {
             id	integer($int64)
-            internaute	string
+            internaute  string
+            sexe        string
         }
     ]
+
+- id : ID réponse internet ménage
+- internaute : internet identifier
+- sexe  : The sexe of the Survey unit 1 for male ; 2 for female 
 
 ### Request
 

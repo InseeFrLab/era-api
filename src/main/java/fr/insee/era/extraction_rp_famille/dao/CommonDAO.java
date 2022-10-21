@@ -5,8 +5,10 @@ import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
 import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
+import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.mapper.BIEntityMapper;
 import fr.insee.era.extraction_rp_famille.model.mapper.RIMDtoMapper;
+import fr.insee.era.extraction_rp_famille.model.mapper.ReponseListeUEDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
         @Autowired ParametrageConfiguration parametrageProperties;
 
         //-------------------------------------------------POUR JSON et COLEMAN----------------------------------------------------------//
-        public abstract List<Pair<Long, String>> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin);
+        public abstract List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin);
         public abstract List<BIEntity> getBiEtLiensForRim(
             Long rimId,
             Map<Long, Long> inoutConjointByIndividuID,
@@ -60,7 +62,7 @@ import java.util.stream.Collectors;
                 }
         }
 
-        protected List<Pair<Long, String>> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) {
+        protected List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) {
 
                 jdbc.execute("DROP TABLE IF EXISTS tmp_rem_communes_a_traiter ");
                 jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_rem_communes_a_traiter_par_sexe (id varchar(255) NOT NULL, sexe varchar(255) NOT NULL)");
@@ -78,12 +80,12 @@ import java.util.stream.Collectors;
                 log.info("Recuperation des RIMs ");
 
                 //TODO a supprimer (c'est juste du log)
-                var tmp = jdbc.queryForList("SELECT id FROM tmp_rem_communes_a_traiter_par_sexe", String.class);
-                log.info("tmp_rem_communes_a_traiter_par_sexe=" + ((tmp.size() > 10) ? (tmp.subList(0, 10) + "...") : tmp));
+               // var tmp = jdbc.queryForList("SELECT id FROM tmp_rem_communes_a_traiter_par_sexe", String.class);
+               // log.info("tmp_rem_communes_a_traiter_par_sexe=" + ((tmp.size() > 10) ? (tmp.subList(0, 10) + "...") : tmp));
 
 
                 String sql =
-                    "select distinct r.id,r.identifiant " + " from   reponseinternetmenages r, bulletinindividuels b , tmp_rem_communes_a_traiter_par_sexe tmp "
+                    "select distinct r.id,r.identifiant,  b.sexe" + " from   reponseinternetmenages r, bulletinindividuels b , tmp_rem_communes_a_traiter_par_sexe tmp "
                         + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.id "
                         + " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
                         + Constantes.ANNEE_NAISSANCE_MAJEUR + "'";
@@ -92,8 +94,8 @@ import java.util.stream.Collectors;
                 Timestamp finTS = new Timestamp(dateFin.getTime());
 
                 log.info("Récupération des rims entre " + debutTS + " et " + finTS);
-                List<Pair<Long,String>> list1 = jdbc.query(sql, new Object[] { debutTS, finTS }, new int[] { Types.TIMESTAMP, Types.TIMESTAMP },
-                    (rs, i) -> Pair.of(rs.getLong(1), rs.getString(2)));
+                var list1 = jdbc.query(sql, new Object[] { debutTS, finTS }, new int[] { Types.TIMESTAMP, Types.TIMESTAMP },
+                    new ReponseListeUEDtoMapper());
 
                 jdbc.execute("TRUNCATE tmp_rem_communes_a_traiter_par_sexe");
                 return list1;

@@ -38,16 +38,16 @@ import java.util.stream.Collectors;
                 HashMap<Long, ReponseListeUEDto> reponseByIdRim = new HashMap<>();
 
                 var listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
-                listeOMER.stream().forEach(pair -> reponseByIdRim.put(pair.getLeft(),new ReponseListeUEDto(pair.getLeft(),pair.getRight())));
+                listeOMER.stream().forEach(ue -> reponseByIdRim.put(ue.getId(),ue));
 
                 var listeODIC = odicDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
-                listeODIC.forEach(pair -> {
-                        if (reponseByIdRim.containsKey(pair.getLeft())) {
+                listeODIC.forEach(ue -> {
+                        if (reponseByIdRim.containsKey(ue.getId())) {
                                 //TODO : doit on logger? Trop d'erreurs pénalisent les perfs
                                 //    log.warn("LA RIM id=" + rim.getId() + " existe à la fois dans HOMERE et dans ODIC");
                         }
                         else
-                                reponseByIdRim.put(pair.getLeft(),new ReponseListeUEDto(pair.getLeft(),pair.getRight()));
+                                reponseByIdRim.put(ue.getId(),ue);
                 });
 
                 return reponseByIdRim.values();
@@ -159,8 +159,9 @@ import java.util.stream.Collectors;
                 objectNode.set("data",dataNode);
                 ObjectNode externalNode = jacksonObjectMapper.createObjectNode();
                 dataNode.set("EXTERNAL",externalNode);
-                externalNode.put("RPNBQUEST",biEnquetes.size());
+                externalNode.put("RPNBQUEST",String.valueOf(biEnquetes.size()));
                 externalNode.put("RPTYPEQUEST",sexe.toFullString());
+                externalNode.put("TYPE_QUEST", sexe.toString());
                 externalNode.put("MailReferent",courriel);
                 ArrayNode listePrenomNode = jacksonObjectMapper.createArrayNode();
                 String listePrenom = String.join(", ",biEnquetes.stream().map(BIEntity::getPrenom).collect(Collectors.toList()));

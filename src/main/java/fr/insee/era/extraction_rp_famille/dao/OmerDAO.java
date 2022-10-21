@@ -3,8 +3,8 @@ package fr.insee.era.extraction_rp_famille.dao;
 import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
+import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,7 +24,7 @@ public class OmerDAO extends CommonDAO {
         }
         @Qualifier("omerJdbcTemplate") @Autowired private JdbcTemplate jdbcTemplate1;
 
-        public List<Pair<Long,String>> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin){
+        public List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin){
                 log.info("getIdRIMetInternetForPeriod OMER");
                 return getIdRIMetInternetForPeriod(dateDebut,dateFin,jdbcTemplate1);
         }
