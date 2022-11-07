@@ -6,11 +6,11 @@ import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
 import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
+import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
 import fr.insee.era.extraction_rp_famille.model.mapper.BIEntityMapper;
 import fr.insee.era.extraction_rp_famille.model.mapper.RIMDtoMapper;
 import fr.insee.era.extraction_rp_famille.model.mapper.ReponseListeUEDtoMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
         @Autowired ParametrageConfiguration parametrageProperties;
 
         //-------------------------------------------------POUR JSON et COLEMAN----------------------------------------------------------//
-        public abstract List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin);
+        public abstract List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin) throws ConfigurationException;
         public abstract List<BIEntity> getBiEtLiensForRim(
             Long rimId,
             Map<Long, Long> inoutConjointByIndividuID,
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
                 try{
 
                         return jdbc.queryForObject("SELECT numvoiloc||' '||typevoiloc||' '||nomvoiloc||' '||cpostloc||' '||cloc as adresse"
-                            + ", rim.identifiant , codedepartement||codecommune as code_commune_complet, mail "
+                            + ", rim.identifiant , codedepartement||codecommune as code_commune_complet, irisar, mail "
                             +"  FROM reponseinternetmenages rim, internautes i "
                             +" where rim.idinternaute  = i.id and rim.id=?", new RIMDtoMapper(),rimId);
 
@@ -62,21 +62,38 @@ import java.util.stream.Collectors;
                 }
         }
 
-        protected List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) {
+        protected List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) throws ConfigurationException {
 
                 jdbc.execute("DROP TABLE IF EXISTS tmp_rem_communes_a_traiter ");
-                jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_rem_communes_a_traiter_par_sexe (id varchar(255) NOT NULL, sexe varchar(255) NOT NULL)");
+                jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_rem_communes_a_traiter_par_sexe (code_commune_insee varchar(255) NOT NULL,  irisar varchar(255), sexe varchar(255) NOT NULL) ");
 
                 List<Object[]> communesSexe = new ArrayList<>();
                 for (String id : parametrageProperties.getCommunesFemmes()) {
-                        communesSexe.add(new Object[] { id, Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
+                        communesSexe.add(new Object[] { id,null,Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
                 }
                 for (String id : parametrageProperties.getCommunesHommes()) {
-                        communesSexe.add(new Object[] { id, Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });
+                        communesSexe.add(new Object[] { id, null,Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });
                 }
+                for (String irisFemme : parametrageProperties.getIrisFemmes()) {
+                        var splittedData = irisFemme.split("-");
+                        if(splittedData.length!=2){
+                                String message = "La conf d'un des iris femme n'est pas du type <codeCommune>-<IRIS>";
+                                log.error(message);
+                                throw new ConfigurationException(message);
+                        }
+                        communesSexe.add(new Object[] { splittedData[0],splittedData[1],Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
+                }
+                for (String irisHomme : parametrageProperties.getIrisHommes()) {
+                        var splittedData = irisHomme.split("-");
+                        if(splittedData.length!=2){
+                                String message = "La conf d'un des iris homme n'est pas du type <codeCommune>-<IRIS>";
+                                log.error(message);
+                                throw new ConfigurationException(message);
+                        }
+                        communesSexe.add(new Object[] { splittedData[0],splittedData[1],Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });                }
 
                 log.info("Insertion dans la table temporaire des communes ");
-                jdbc.batchUpdate("INSERT INTO tmp_rem_communes_a_traiter_par_sexe VALUES(?,?)", communesSexe);
+                jdbc.batchUpdate("INSERT INTO tmp_rem_communes_a_traiter_par_sexe VALUES(?,?,?)", communesSexe);
                 log.info("Recuperation des RIMs ");
 
                 //TODO a supprimer (c'est juste du log)
@@ -86,7 +103,8 @@ import java.util.stream.Collectors;
 
                 String sql =
                     "select distinct r.id,r.identifiant,  b.sexe" + " from   reponseinternetmenages r, bulletinindividuels b , tmp_rem_communes_a_traiter_par_sexe tmp "
-                        + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.id "
+                        + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.code_commune_insee "
+                        + " and (tmp.irisar is null or tmp.irisar=r.irisar) "
                         + " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
                         + Constantes.ANNEE_NAISSANCE_MAJEUR + "'";
 

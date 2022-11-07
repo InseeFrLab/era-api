@@ -15,6 +15,7 @@ public class RIMDtoMapper implements RowMapper<RIMDto> {
                         .addresse(resultSet.getString("adresse"))
                         .courriel(resultSet.getString("mail"))
                         .codeCommune(resultSet.getString("code_commune_complet"))
+                        .iris(resultSet.getString("irisar"))
                         .identifiantInternet(resultSet.getString("identifiant"))
                         .build();
         }

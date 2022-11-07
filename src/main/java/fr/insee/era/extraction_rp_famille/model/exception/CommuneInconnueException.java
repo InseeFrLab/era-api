@@ -6,4 +6,7 @@ public class CommuneInconnueException extends Exception{
                 super("Commune "+identifiantCommune+" inconnue de la configuration");
         }
 
+        public CommuneInconnueException(String identifiantCommune, String iris) {
+                super("Iris Commune= "+identifiantCommune+" Iris="+iris+" inconnu de la configuration");
+        }
 }

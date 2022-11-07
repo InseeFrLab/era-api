@@ -10,4 +10,5 @@ public class RIMDto {
         String identifiantInternet;
         String codeCommune;
         String addresse;
+        String iris;
 }

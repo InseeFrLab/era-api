@@ -5,6 +5,7 @@ import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
+import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,7 +26,7 @@ public class OdicDAO extends CommonDAO{
         @Autowired
         private OdicDataSourceConfiguration conf;
 
-        public List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin){
+        public List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin) throws ConfigurationException {
                 log.info("getIdRIMetInternetForPeriod ODIC");
 
                 JdbcTemplate jdbcTemplate1 = new JdbcTemplate(conf.odicDataSource());

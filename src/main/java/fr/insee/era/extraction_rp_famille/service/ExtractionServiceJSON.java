@@ -10,6 +10,7 @@ import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueException;
+import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
 import fr.insee.era.extraction_rp_famille.model.exception.PasDeBIDuBonSexeException;
 import fr.insee.era.extraction_rp_famille.model.exception.RimInconnueException;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
         @Autowired ParametrageConfiguration parametrageProperties;
 
 
-        public Collection<ReponseListeUEDto> getAllRimForPeriod(Date dateDebut, Date dateFin) throws DataAccessException {
+        public Collection<ReponseListeUEDto> getAllRimForPeriod(Date dateDebut, Date dateFin) throws DataAccessException, ConfigurationException {
 
                 HashMap<Long, ReponseListeUEDto> reponseByIdRim = new HashMap<>();
 
@@ -84,17 +85,10 @@ import java.util.stream.Collectors;
                         throw new RimInconnueException(idRim);
                 }
 
-                Constantes.BI_SEXE sexe;
-                if(parametrageProperties.getCommunesFemmes().contains(rimDetails.getCodeCommune())){
-                        sexe=Constantes.BI_SEXE.BI_SEXE_FEMME;
+                Constantes.BI_SEXE sexe = parametrageProperties.getSexeForCommuneIris(rimDetails.getCodeCommune(),rimDetails.getIris());
+                if(sexe==null){
+                        throw new CommuneInconnueException(rimDetails.getCodeCommune(),rimDetails.getIris());
                 }
-                else if(parametrageProperties.getCommunesHommes().contains(rimDetails.getCodeCommune())){
-                        sexe=Constantes.BI_SEXE.BI_SEXE_HOMME;
-                }
-                else{
-                        throw new CommuneInconnueException(rimDetails.getCodeCommune());
-                }
-
 
 
                 ObjectNode resultat  = jacksonObjectMapper.createObjectNode();

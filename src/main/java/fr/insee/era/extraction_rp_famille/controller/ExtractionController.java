@@ -2,6 +2,7 @@ package fr.insee.era.extraction_rp_famille.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
+import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
 import fr.insee.era.extraction_rp_famille.service.ExtractionServiceJSON;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -35,7 +36,7 @@ public class ExtractionController {
         @GetMapping(value="/survey-units-for-period")
         @Operation(summary = "Récupération des répondants aux RP d'une période")
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
-            throws DataAccessException {
+            throws DataAccessException, ConfigurationException {
                 log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getAllRimForPeriod(dateDebut, dateFin));
         }
