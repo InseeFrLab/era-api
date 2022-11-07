@@ -19,10 +19,18 @@ The program takes a parametrage.properties file to configure the targeted commun
 ex:
 
 `communes.hommes=12345`
-
 `communes.femmes=56789`
 
 Where 12456 is the INSEE Code of the commune.
+
+
+`iris.femmes=12456-0001, 12456-0002`
+`iris.femmes=12456-0003, 12456-0004`
+
+Where 12456 is the INSEE Code of the commune.
+and 000x is the iris code
+
+
 
 ### REST API
 ### Request
