@@ -53,6 +53,7 @@ params :
 
 - id : ID réponse internet ménage
 - internaute : internet identifier
+- mail        : The mail of the survey unit
 - sexe  : The sexe of the Survey unit 1 for male ; 2 for female 
 
 ### Request
