@@ -23,6 +23,7 @@ public class ReponseListeUEDtoMapper implements RowMapper<ReponseListeUEDto> {
                     ReponseListeUEDto.builder()
                         .id(resultSet.getLong("id"))
                         .internaute(resultSet.getString("identifiant"))
+                        .mail(resultSet.getString("mail"))
                         .sexe(sexe.toString())
                         .build();
         }

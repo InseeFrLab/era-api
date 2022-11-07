@@ -102,11 +102,13 @@ import java.util.stream.Collectors;
 
 
                 String sql =
-                    "select distinct r.id,r.identifiant,  b.sexe" + " from   reponseinternetmenages r, bulletinindividuels b , tmp_rem_communes_a_traiter_par_sexe tmp "
+                    "select distinct r.id,r.identifiant,  b.sexe, i.mail"
+                        + " from   reponseinternetmenages r, bulletinindividuels b ,  internautes i, tmp_rem_communes_a_traiter_par_sexe tmp "
                         + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.code_commune_insee "
                         + " and (tmp.irisar is null or tmp.irisar=r.irisar) "
                         + " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
-                        + Constantes.ANNEE_NAISSANCE_MAJEUR + "'";
+                        + Constantes.ANNEE_NAISSANCE_MAJEUR + "' "
+                        + " and r.idinternaute  = i.id ";
 
                 Timestamp debutTS = new Timestamp(dateDebut.getTime());
                 Timestamp finTS = new Timestamp(dateFin.getTime());

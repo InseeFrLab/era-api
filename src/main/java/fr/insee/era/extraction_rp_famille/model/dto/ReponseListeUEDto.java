@@ -10,5 +10,6 @@ public class ReponseListeUEDto {
 
         Long id;
         String internaute;
+        String mail;
         String sexe; //1 homme ; 2 femme
 }
