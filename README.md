@@ -46,6 +46,7 @@ params :
         {
             id	integer($int64)
             internaute  string
+            mail        string
             sexe        string
         }
     ]
