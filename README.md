@@ -232,3 +232,20 @@ Designed to be sent to colleman
         "idSu": "<id>"
     }
     }
+
+### Specification
+#### Adults
+
+An adult is a person who is 18yo before 1st junary of the current year.
+Ex: for the 2023 test adults are persons born before 1st junary 2005
+
+#### Maximums 
+
+maximum 10 persons of the same sex in a SU 
+maximum 12 children by person
+ 
+#### Database inconsistencies
+
+We discard links found in table lienindividus where there is no mirror link
+ex: Parent -> Child must have a Child->Parent equivalent for the same persons
+
