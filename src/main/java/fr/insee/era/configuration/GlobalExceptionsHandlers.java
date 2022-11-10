@@ -12,13 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @ControllerAdvice
 @Slf4j
-public class GlobalExceptionsHandlers {
+public class GlobalExceptionsHandlers extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<String> exceptionBaseDeDonnee(final HttpServletRequest req, final DataAccessException exception) {
