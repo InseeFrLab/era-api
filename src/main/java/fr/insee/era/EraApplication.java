@@ -28,11 +28,6 @@ import java.util.stream.StreamSupport;
 public class EraApplication {
 
         public static void main(String[] args) {
-                log.info("================================ command line arguments =================================");
-                for(String arg:args) {
-                        log.info(arg);
-                }
-
                 SpringApplication.run(EraApplication.class, args);
         }
 
