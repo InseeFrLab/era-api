@@ -64,8 +64,8 @@ import java.util.stream.Collectors;
 
         protected List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) throws ConfigurationException {
 
-                jdbc.execute("DROP TABLE IF EXISTS tmp_rem_communes_a_traiter ");
-                jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_rem_communes_a_traiter_par_sexe (code_commune_insee varchar(255) NOT NULL,  irisar varchar(255), sexe varchar(255) NOT NULL) ");
+                jdbc.execute("DROP TABLE IF EXISTS tmp_era_communes_a_traiter_par_sexe ");
+                jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_era_communes_a_traiter_par_sexe (code_commune_insee varchar(255) NOT NULL,  irisar varchar(255), sexe varchar(255) NOT NULL) ");
 
                 List<Object[]> communesSexe = new ArrayList<>();
                 for (String id : parametrageProperties.getCommunesFemmes()) {
@@ -93,17 +93,11 @@ import java.util.stream.Collectors;
                         communesSexe.add(new Object[] { splittedData[0],splittedData[1],Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });                }
 
                 log.info("Insertion dans la table temporaire des communes ");
-                jdbc.batchUpdate("INSERT INTO tmp_rem_communes_a_traiter_par_sexe VALUES(?,?,?)", communesSexe);
+                jdbc.batchUpdate("INSERT INTO tmp_era_communes_a_traiter_par_sexe VALUES(?,?,?)", communesSexe);
                 log.info("Recuperation des RIMs ");
-
-                //TODO a supprimer (c'est juste du log)
-               // var tmp = jdbc.queryForList("SELECT id FROM tmp_rem_communes_a_traiter_par_sexe", String.class);
-               // log.info("tmp_rem_communes_a_traiter_par_sexe=" + ((tmp.size() > 10) ? (tmp.subList(0, 10) + "...") : tmp));
-
-
                 String sql =
                     "select distinct r.id,r.identifiant,  b.sexe, i.mail"
-                        + " from   reponseinternetmenages r, bulletinindividuels b ,  internautes i, tmp_rem_communes_a_traiter_par_sexe tmp "
+                        + " from   reponseinternetmenages r, bulletinindividuels b ,  internautes i, tmp_era_communes_a_traiter_par_sexe tmp "
                         + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.code_commune_insee "
                         + " and (tmp.irisar is null or tmp.irisar=r.irisar) "
                         + " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
@@ -117,7 +111,7 @@ import java.util.stream.Collectors;
                 var list1 = jdbc.query(sql, new Object[] { debutTS, finTS }, new int[] { Types.TIMESTAMP, Types.TIMESTAMP },
                     new ReponseListeUEDtoMapper());
 
-                jdbc.execute("TRUNCATE tmp_rem_communes_a_traiter_par_sexe");
+                jdbc.execute("TRUNCATE tmp_era_communes_a_traiter_par_sexe");
                 return list1;
         }
 
