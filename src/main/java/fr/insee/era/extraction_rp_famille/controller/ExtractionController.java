@@ -9,14 +9,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.trace.http.HttpTrace;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.security.RolesAllowed;
 import java.sql.Date;
 import java.util.Collection;
 
@@ -28,11 +25,8 @@ public class ExtractionController {
 
         @Autowired ExtractionServiceJSON extractionServiceJSON;
 
-
         @Autowired AccessToken accessToken;
 
-  //      @PreAuthorize("isAuthenticated()")
- //       @RolesAllowed("user")
         @GetMapping(value="/survey-units-for-period")
         @Operation(summary = "Récupération des répondants aux RP d'une période")
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)

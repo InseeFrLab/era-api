@@ -6,6 +6,8 @@ import fr.insee.era.extraction_rp_famille.model.exception.PasDeBIDuBonSexeExcept
 import fr.insee.era.extraction_rp_famille.model.exception.RimInconnueException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,15 @@ public class GlobalExceptionsHandlers extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({AccessDeniedException.class})
     public ResponseEntity<String> accessRefuse(final HttpServletRequest req, final AccessDeniedException exception) {
-        log.error("accessRefuse  : ",exception);
+        if(req.getUserPrincipal()!=null && req.getUserPrincipal().getClass()==KeycloakAuthenticationToken.class){
+            KeycloakAuthenticationToken token = (KeycloakAuthenticationToken) req.getUserPrincipal();
+            log.error("accessRefuse uri={} -  user={} - userRoles={}", req.getRequestURI(),token.getAccount(),
+                ((KeycloakPrincipal) token.getPrincipal()).getKeycloakSecurityContext().getToken().getRealmAccess().getRoles());
+        }
+        else{
+            log.error("accessRefuse uri={} -  user={}  ", req.getRequestURI(),req.getUserPrincipal());
+
+        }
         return new ResponseEntity<>("Accès refusé", HttpStatus.FORBIDDEN);
     }
 
