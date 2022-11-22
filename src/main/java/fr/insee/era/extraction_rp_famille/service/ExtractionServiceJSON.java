@@ -23,6 +23,7 @@ import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j @Service public class ExtractionServiceJSON {
@@ -38,19 +39,25 @@ import java.util.stream.Collectors;
 
                 HashMap<Long, ReponseListeUEDto> reponseByIdRim = new HashMap<>();
 
-                var listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
+
+                List<ReponseListeUEDto> listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
                 listeOMER.stream().forEach(ue -> reponseByIdRim.put(ue.getId(),ue));
 
+                //Pour compter le nombre d'UE issues d'ODIC
+                AtomicInteger nbUeODIC = new AtomicInteger(0);
                 var listeODIC = odicDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
+                //on parcours les UE d'ODIC et on ne garde que celles qui ne sont pas déjà présentes dans OMER
                 listeODIC.forEach(ue -> {
                         if (reponseByIdRim.containsKey(ue.getId())) {
                                 //TODO : doit on logger? Trop d'erreurs pénalisent les perfs
                                 //    log.warn("LA RIM id=" + rim.getId() + " existe à la fois dans HOMERE et dans ODIC");
                         }
-                        else
-                                reponseByIdRim.put(ue.getId(),ue);
+                        else {
+                                reponseByIdRim.put(ue.getId(), ue);
+                                nbUeODIC.getAndIncrement();
+                        }
                 });
-
+                log.info("Nombre d'UE issues des deux bases : HOMERE={} - ODIC={}",listeOMER.size(), nbUeODIC);
                 return reponseByIdRim.values();
         }
 
@@ -101,7 +108,7 @@ import java.util.stream.Collectors;
                 jsonQuestionnaire.set("stateData", jacksonObjectMapper.createObjectNode());
 
                 //Json pour coleman pilotage
-                ObjectNode jsonPilotage=computeColemanPilotageReponse(idRim,rimDetails.getAddresse(), rimDetails.getIdentifiantInternet(), questionnaireId);
+                ObjectNode jsonPilotage=computeColemanPilotageReponse(idRim,rimDetails.getAddresse(),sexe, rimDetails.getIdentifiantInternet(), questionnaireId);
 
                 resultat.set("questionnaire",jsonQuestionnaire);
                 resultat.set("pilotage",jsonPilotage);
@@ -109,10 +116,10 @@ import java.util.stream.Collectors;
                 return resultat;
         }
 
-        private ObjectNode computeColemanPilotageReponse(Long idRim, String adresse, String identifiantInternet, String questionnaireId) {
+        private ObjectNode computeColemanPilotageReponse(Long idRim, String adresse, Constantes.BI_SEXE sexe, String identifiantInternet, String questionnaireId) {
                 ObjectNode resultat  = jacksonObjectMapper.createObjectNode();
                 resultat.put("address", adresse);
-                resultat.put("batchNumber", 1);
+                resultat.put("batchNumber", sexe.toString()); //Correspond au sexe
                 resultat.put("firstname", "");
                 resultat.put("lastname", "");
                 resultat.put("idCampaign", questionnaireId);
