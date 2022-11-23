@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 @Configuration
 @OpenAPIDefinition(
-    info = @io.swagger.v3.oas.annotations.info.Info(title = "Extraction dans les formats attendus par colleman",
+    info = @io.swagger.v3.oas.annotations.info.Info(title = "Extraction dans les formats attendus par Coleman",
         description = "Extraction des données de contacts et des externals "
     //        ,contact = @Contact(
     //            name = "Equipe informatique",
