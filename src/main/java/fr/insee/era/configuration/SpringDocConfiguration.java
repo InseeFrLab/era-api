@@ -68,8 +68,8 @@ public class SpringDocConfiguration {
                     .description(issuerDescription)
                     .flows(
                         new OAuthFlows()
-                            .implicit(
-                            //.authorizationCode(
+                            //.implicit(
+                            .authorizationCode(
                                 new OAuthFlow()
                                     .authorizationUrl(issuerAuthorizationURL)
                                     .tokenUrl(issuerTokenURL)
