@@ -7,11 +7,11 @@ import fr.insee.era.extraction_rp_famille.service.ExtractionServiceJSON;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
@@ -25,20 +25,20 @@ public class ExtractionController {
 
         @Autowired ExtractionServiceJSON extractionServiceJSON;
 
-        @Autowired AccessToken accessToken;
 
         @GetMapping(value="/survey-units-for-period")
         @Operation(summary = "Récupération des répondants aux RP d'une période")
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
             throws DataAccessException, ConfigurationException {
-                log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",accessToken.getPreferredUsername(), dateDebut, dateFin);
+                log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",SecurityContextHolder.getContext().getAuthentication().getName(), dateDebut, dateFin);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getAllRimForPeriod(dateDebut, dateFin));
         }
 
         @GetMapping(value="/{id}")
         @Operation(summary = "Récupération d'une unité enquêtée par son identifiant")
-        public ResponseEntity<ObjectNode>  getSU(@PathVariable("id") Long ueId, @RequestParam("idCampaign ") String questionnaireId) throws Exception {
-                log.info("getSU utilisateur={} id={} questionnaireId={} ",accessToken.getPreferredUsername(), ueId, questionnaireId);
+        public ResponseEntity<ObjectNode>  getSU(@PathVariable("id") Long ueId, @RequestParam("idCampaign ") String questionnaireId)
+            throws Exception {
+                log.info("getSU utilisateur={} id={} questionnaireId={} ",SecurityContextHolder.getContext().getAuthentication().getName(), ueId, questionnaireId);
                 return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getDataForRim(ueId,questionnaireId));
         }
 }

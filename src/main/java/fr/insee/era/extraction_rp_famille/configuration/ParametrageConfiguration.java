@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 @Configuration @PropertySource(value = "classpath:parametrage.properties") @Getter @Slf4j public class ParametrageConfiguration {
 
@@ -70,4 +72,13 @@ import java.util.Map;
                 return res;
         }
 
+        @PostConstruct
+        private void logProperties() {
+                log.info("================================ Properties : Parametrage =================================");
+                log.info("Communes hommes : {} ", communesHommes);
+                log.info("Communes femmes : {} ", communesFemmes);
+                log.info("Iris hommes : {} ", irisHommes);
+                log.info("Iris femmes : {} ", irisFemmes);
+                log.info("============================================================================");
+        }
 }
