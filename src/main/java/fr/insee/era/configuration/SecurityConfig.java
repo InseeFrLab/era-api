@@ -27,9 +27,13 @@ public class SecurityConfig {
         @Value("${fr.insee.era.admin.role.rp:#{null}}") private String adminRP;
 
         private String ROLE_PREFIX = "ROLE_";
-        private String oidcClaimUsername = "sub";
+
+        @Value("${fr.insee.era.security.oidc-claim-username:sub}")
+        private String oidcClaimUsername;
+
         /** Path to the role field in token. For instance realm_access.role */
-        private String oidcClaimRole = "realm_access.roles";
+        @Value("${fr.insee.era.security.oidc-claim-role:realm_access.roles}")
+        private String oidcClaimRole;
 
     private static final String[] SWAGGER_WHITELIST = {
         "/v3/api-docs/**",
