@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -46,19 +48,10 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-                /* http.cors(withDefaults()).authorizeRequests()
-                    .antMatchers(SWAGGER_WHITELIST).permitAll()
-                    .antMatchers("/extraction-survey-unit/**").hasRole(adminRP)
-                // Zone open bar
-                .and()
-                .formLogin().permitAll().and().logout().permitAll()
-                .and().oauth2ResourceServer().jwt();
-                http.csrf().disable();
-                return http.build();*/
                 http
-                    .authorizeRequests(authorize -> authorize
-                        .antMatchers(SWAGGER_WHITELIST).permitAll()
-                        .antMatchers("/extraction-survey-unit/**").hasRole(adminRP)
+                    .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers("/extraction-survey-unit/**").hasRole(adminRP)
                     )
                     .formLogin(form -> form.permitAll())
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt().jwtAuthenticationConverter(jwtAuthenticationConverter()));
@@ -68,7 +61,6 @@ public class SecurityConfig {
                     });*/
                 return http.build();
         }
-
         @Bean
         JwtAuthenticationConverter jwtAuthenticationConverter() {
                 JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();

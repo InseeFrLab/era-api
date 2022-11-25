@@ -16,7 +16,7 @@ import java.util.stream.StreamSupport;
 
 @SpringBootApplication
 @Slf4j
-public class EraApplication {
+public class EraApplication  {
 
         public static void main(String[] args) {
                 SpringApplication.run(EraApplication.class, args);

@@ -4,6 +4,7 @@ import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueExcepti
 import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
 import fr.insee.era.extraction_rp_famille.model.exception.PasDeBIDuBonSexeException;
 import fr.insee.era.extraction_rp_famille.model.exception.RimInconnueException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.dao.DataAccessException;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @ControllerAdvice

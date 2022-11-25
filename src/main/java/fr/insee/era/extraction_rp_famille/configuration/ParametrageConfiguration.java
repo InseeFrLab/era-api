@@ -5,17 +5,19 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
-@Configuration @PropertySource(value = "classpath:parametrage.properties") @Getter @Slf4j public class ParametrageConfiguration {
+@Configuration @PropertySource(value = "classpath:parametrage.properties")
+@Getter @Slf4j
+
+public class ParametrageConfiguration implements InitializingBean {
 
         private static Boolean isInitialised = false;
         private static Map<String, Constantes.BI_SEXE> communesSansIRIS;
@@ -72,13 +74,13 @@ import java.util.stream.StreamSupport;
                 return res;
         }
 
-        @PostConstruct
-        private void logProperties() {
+        @Override public void afterPropertiesSet() {
                 log.info("================================ Properties : Parametrage =================================");
                 log.info("Communes hommes : {} ", communesHommes);
                 log.info("Communes femmes : {} ", communesFemmes);
                 log.info("Iris hommes : {} ", irisHommes);
                 log.info("Iris femmes : {} ", irisFemmes);
                 log.info("============================================================================");
+
         }
 }
