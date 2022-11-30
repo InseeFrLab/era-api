@@ -15,6 +15,8 @@
     <description>API permettant de générer des JSON pour coleman</description>
     <properties>
         <java.version>17</java.version>
+        <opencsv.version>5.7.1</opencsv.version>
+        <springdoc.version>2.0.0</springdoc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -39,9 +41,11 @@
         <!-- swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.11</version>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
+
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -92,6 +96,12 @@
             <artifactId>spring-security-oauth2-resource-server</artifactId>
         </dependency>
 
+        <!-- pour sortie CSV ; a supprimer quand on n en aura plus besoin-->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
+        </dependency>
 
     </dependencies>
 
