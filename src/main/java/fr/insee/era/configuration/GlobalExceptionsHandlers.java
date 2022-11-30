@@ -23,7 +23,7 @@ public class GlobalExceptionsHandlers extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<String> exceptionBaseDeDonnee(final HttpServletRequest req, final DataAccessException exception) {
-        log.error("exceptionBaseDeDonnee  : ",exception);
+        log.error("exceptionBaseDeDonnee  : {}",exception);
         return new ResponseEntity<>("Erreur d'accès aux bases de données du RP ", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -36,32 +36,32 @@ public class GlobalExceptionsHandlers extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({IOException.class})
     public ResponseEntity<String> exceptionEntreeSortie(final HttpServletRequest req, final IOException exception) {
-        log.error("exceptionEntreeSortie  : ",exception);
+        log.error("exceptionEntreeSortie  : {}",exception);
         return new ResponseEntity<>("Erreur d'entree/sortie ", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
     @ExceptionHandler({ CommuneInconnueException.class})
     public ResponseEntity<String> exceptionCommuneInconnue(final HttpServletRequest req, final CommuneInconnueException exception) {
-        log.info("exceptionCommuneInconnue : ",exception.getMessage());
+        log.info("exceptionCommuneInconnue : {}",exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ RimInconnueException.class})
     public ResponseEntity<String> rimInconnueException(final HttpServletRequest req, final RimInconnueException exception) {
-        log.info("rimInconnueException  : ",exception.getMessage());
+        log.info("rimInconnueException  : {}",exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ PasDeBIDuBonSexeException.class})
     public ResponseEntity<String> pasDeBIDuBonSexeException(final HttpServletRequest req, final PasDeBIDuBonSexeException exception) {
-        log.info("pasDeBIDuBonSexeException  : ",exception.getMessage());
+        log.info("pasDeBIDuBonSexeException  : {}",exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ConfigurationException.class)
     public ResponseEntity<String> handleConfigurationException(final HttpServletRequest req, final ConfigurationException exception) {
-        log.info("handleConfigurationException  : ",exception.getMessage());
+        log.info("handleConfigurationException  : {}",exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

@@ -1,16 +1,16 @@
 package fr.insee.era.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -25,46 +25,38 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SecurityConfig {
 
-        //Administrateur authorisé pour les actions sur le domaine RP
-        @Value("${fr.insee.era.admin.role.rp:#{null}}") private String adminRP;
 
+        @Value("${fr.insee.era.admin.role.rp}")
+        private String administrateurRPRole;
+        @Value("${fr.insee.era.admin.role.hors-rp}")
+        private String administrateurHorsRPRole;
+
+
+        //Par défaut, spring sécurity prefixe les rôles avec cette chaine
         private String ROLE_PREFIX = "ROLE_";
 
-        @Value("${fr.insee.era.security.oidc-claim-username:sub}")
-        private String oidcClaimUsername;
+        @Autowired InseeSecurityTokenProperties inseeSecurityTokenProperties;
 
-        /** Path to the role field in token. For instance realm_access.role */
-        @Value("${fr.insee.era.security.oidc-claim-role:realm_access.roles}")
-        private String oidcClaimRole;
-
-    private static final String[] SWAGGER_WHITELIST = {
-        "/v3/api-docs/**",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
-        //Actuator (health check)
-        "/actuator/**",
-    };
+        //Liste d'URL sur lesquels on n'applique pas de sécurité (swagger; actuator...)
+        @Value("#{'${fr.insee.sndil.starter.security.whitelist-matchers}'.split(',')}")
+        private String[] whiteList;
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-                http
-                    .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        .requestMatchers("/extraction-survey-unit/**").hasRole(adminRP)
+                http.csrf().disable()
+                    .authorizeHttpRequests(authorize ->
+                        authorize.requestMatchers(whiteList).permitAll()
+                            .requestMatchers("/extraction-survey-unit/**").hasRole(administrateurRPRole)
                     )
-                    .formLogin(form -> form.permitAll())
+                    .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt().jwtAuthenticationConverter(jwtAuthenticationConverter()));
-                    /*.exceptionHandling().accessDeniedHandler((request, response, accessDeniedException) -> {
-                            log.info("AccessDenied (from spring security) uri={} -  user={}  ", request.getRequestURI(),request.getUserPrincipal());
-                            throw accessDeniedException;
-                    });*/
                 return http.build();
         }
         @Bean
         JwtAuthenticationConverter jwtAuthenticationConverter() {
                 JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-                jwtAuthenticationConverter.setPrincipalClaimName(oidcClaimUsername);
+                jwtAuthenticationConverter.setPrincipalClaimName(inseeSecurityTokenProperties.getOidcClaimUsername());
                 jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter());
                 return jwtAuthenticationConverter;
         }
@@ -73,7 +65,7 @@ public class SecurityConfig {
                 return new Converter<Jwt, Collection<GrantedAuthority>>() {
                         @Override @SuppressWarnings({ "unchecked" }) public Collection<GrantedAuthority> convert(Jwt source) {
 
-                                String[] claimPath = oidcClaimRole.split("\\.");
+                                String[] claimPath = inseeSecurityTokenProperties.getOidcClaimRole().split("\\.");
                                 Map<String, Object> claims = source.getClaims();
                                 try {
 
