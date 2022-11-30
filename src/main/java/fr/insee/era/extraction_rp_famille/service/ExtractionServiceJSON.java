@@ -8,6 +8,7 @@ import fr.insee.era.extraction_rp_famille.dao.OdicDAO;
 import fr.insee.era.extraction_rp_famille.dao.OmerDAO;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
+import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueException;
 import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
@@ -108,7 +109,8 @@ import java.util.stream.Collectors;
                 jsonQuestionnaire.set("stateData", jacksonObjectMapper.createObjectNode());
 
                 //Json pour coleman pilotage
-                ObjectNode jsonPilotage=computeColemanPilotageReponse(idRim,rimDetails.getAddresse(),sexe, rimDetails.getIdentifiantInternet(), questionnaireId);
+                String adresse = computeAdresse(rimDetails);
+                ObjectNode jsonPilotage=computeColemanPilotageReponse(idRim,adresse,sexe, rimDetails.getIdentifiantInternet(), questionnaireId);
 
                 resultat.set("questionnaire",jsonQuestionnaire);
                 resultat.set("pilotage",jsonPilotage);
@@ -116,6 +118,10 @@ import java.util.stream.Collectors;
                 return resultat;
         }
 
+        private String computeAdresse(RIMDto rim){
+                return String.format("{} {} {} {} {} "
+                    ,rim.getNumvoiloc(), rim.getTypevoiloc(), rim.getNomvoiloc(), rim.getCpostloc(), rim.getCloc());
+        }
         private ObjectNode computeColemanPilotageReponse(Long idRim, String adresse, Constantes.BI_SEXE sexe, String identifiantInternet, String questionnaireId) {
                 ObjectNode resultat  = jacksonObjectMapper.createObjectNode();
                 resultat.put("address", adresse);

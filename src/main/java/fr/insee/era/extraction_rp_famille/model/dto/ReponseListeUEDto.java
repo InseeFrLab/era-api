@@ -1,6 +1,5 @@
 package fr.insee.era.extraction_rp_famille.model.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -9,6 +9,16 @@ public class RIMDto {
         String courriel;
         String identifiantInternet;
         String codeCommune;
-        String addresse;
         String iris;
+
+        //Adresse
+        //String addresse;
+        String numvoiloc;
+        String typevoiloc;
+        String nomvoiloc;
+        String cpostloc;
+        String cloc;
+
+
 }
+

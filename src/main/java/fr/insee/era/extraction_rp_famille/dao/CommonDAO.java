@@ -11,6 +11,8 @@ import fr.insee.era.extraction_rp_famille.model.mapper.BIEntityMapper;
 import fr.insee.era.extraction_rp_famille.model.mapper.RIMDtoMapper;
 import fr.insee.era.extraction_rp_famille.model.mapper.ReponseListeUEDtoMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -22,6 +24,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,7 +52,7 @@ import java.util.stream.Collectors;
 
                 try{
 
-                        return jdbc.queryForObject("SELECT numvoiloc||' '||typevoiloc||' '||nomvoiloc||' '||cpostloc||' '||cloc as adresse"
+                        return jdbc.queryForObject("SELECT numvoiloc,typevoiloc,nomvoiloc,cpostloc,cloc "
                             + ", rim.identifiant , codedepartement||codecommune as code_commune_complet, irisar, mail "
                             +"  FROM reponseinternetmenages rim, internautes i "
                             +" where rim.idinternaute  = i.id and rim.id=?", new RIMDtoMapper(),rimId);
@@ -94,7 +97,7 @@ import java.util.stream.Collectors;
 
                 log.info("Insertion dans la table temporaire des communes ");
                 jdbc.batchUpdate("INSERT INTO tmp_era_communes_a_traiter_par_sexe VALUES(?,?,?)", communesSexe);
-                log.info("Recuperation des RIMs ");
+                log.info("Recuperation des RIMs (ayant un mail renseigné)");
                 String sql =
                     "select distinct r.id,r.identifiant,  b.sexe, i.mail"
                         + " from   reponseinternetmenages r, bulletinindividuels b ,  internautes i, tmp_era_communes_a_traiter_par_sexe tmp "
@@ -102,7 +105,10 @@ import java.util.stream.Collectors;
                         + " and (tmp.irisar is null or tmp.irisar=r.irisar) "
                         + " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
                         + Constantes.ANNEE_NAISSANCE_MAJEUR + "' "
-                        + " and r.idinternaute  = i.id ";
+                        + " and r.idinternaute  = i.id "
+                        // enlever les personnes sans mail car pour famille on ne peut rien en faire
+                        + " and (LTRIM(i.mail) <> '')  "
+                    ;
 
                 Timestamp debutTS = new Timestamp(dateDebut.getTime());
                 Timestamp finTS = new Timestamp(dateFin.getTime());
@@ -137,7 +143,7 @@ import java.util.stream.Collectors;
                         String inParams = String.join(",", biIdList.stream().map(id -> "?").collect(Collectors.toList()));
 
                         String sqlLien = String.format("SELECT individu, lienenregistre, individurelie " + " FROM lienindividus " + " WHERE lienenregistre in (1,2,3)"
-                                + "        AND ( individu IN (%s) or individurelie in (%s) ) ", inParams, inParams);
+                                + "        AND ( individu IN (%s) and individurelie in (%s) ) ", inParams, inParams);
 
                         List<Long> liste2X = biIdList;
                         liste2X.addAll(biIdList);
@@ -193,13 +199,21 @@ import java.util.stream.Collectors;
 
 
         private void nettoyageLiensParentsEnfants(LinkedMultiValueMap<Long,Long> mapA, LinkedMultiValueMap<Long,Long> mapB){
+                //Pair :
+                //      Left  : Key dans mapA
+                //      Right : Value de mapA(left) à supprimer de la liste
+                List<Pair<Long,Long>> liensASupprimer = new LinkedList<>();
                 for ( Long individuId : new ArrayList<>(mapA.keySet())  ) {
                         for (Long individuRelieId: mapA.get(individuId)) {
-                                if(!mapB.get(individuRelieId).contains(individuId)){
-                                        log.debug("On supprimer le lien orphelin PARENT individu="+individuId+" individurelie="+individuRelieId);
-                                        mapA.get(individuId).remove(individuRelieId);
+                                if(!mapB.containsKey(individuRelieId) ||!mapB.get(individuRelieId).contains(individuId) ) {
+                                        log.info("On supprime le lien orphelin individu=" + individuId + " individurelie=" + individuRelieId);
+                                        liensASupprimer.add(new ImmutablePair<>(individuId, individuRelieId));
                                 }
                         }
+                }
+
+                for (Pair<Long,Long> lienASupprimer : liensASupprimer  ) {
+                        mapA.get(lienASupprimer.getLeft()).remove(lienASupprimer.getRight());
                 }
         }
 }
