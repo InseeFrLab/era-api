@@ -23,7 +23,7 @@ public class GlobalExceptionsHandlers extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<String> exceptionBaseDeDonnee(final HttpServletRequest req, final DataAccessException exception) {
-        log.error("exceptionBaseDeDonnee  : {}",exception);
+        log.error("exceptionBaseDeDonnee  : {}",exception.getMessage());
         return new ResponseEntity<>("Erreur d'accès aux bases de données du RP ", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -36,7 +36,7 @@ public class GlobalExceptionsHandlers extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({IOException.class})
     public ResponseEntity<String> exceptionEntreeSortie(final HttpServletRequest req, final IOException exception) {
-        log.error("exceptionEntreeSortie  : {}",exception);
+        log.error("exceptionEntreeSortie  : {}",exception.getMessage());
         return new ResponseEntity<>("Erreur d'entree/sortie ", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
