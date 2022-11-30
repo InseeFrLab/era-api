@@ -1,8 +1,10 @@
 package fr.insee.era;
 
+import fr.insee.era.configuration.PropertiesLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -19,35 +21,11 @@ import java.util.stream.StreamSupport;
 public class EraApplication  {
 
         public static void main(String[] args) {
-                SpringApplication.run(EraApplication.class, args);
+                configureApplicationBuilder(new SpringApplicationBuilder()).build().run(args);        }
+
+        public static SpringApplicationBuilder configureApplicationBuilder(SpringApplicationBuilder springApplicationBuilder){
+                return springApplicationBuilder.sources(EraApplication.class)
+                    .listeners(new PropertiesLogger());
         }
-
-
-        @EventListener
-        public void handleContextRefresh(ContextRefreshedEvent event) {
-
-                final Environment env = event.getApplicationContext().getEnvironment();
-
-                log.info("================================ Properties =================================");
-                final MutablePropertySources sources = ((AbstractEnvironment) env).getPropertySources();
-                StreamSupport.stream(sources.spliterator(), false).filter(EnumerablePropertySource.class::isInstance)
-                    .map(ps -> ((EnumerablePropertySource<?>) ps).getPropertyNames()).flatMap(Arrays::stream).distinct()
-                    .filter(prop -> !(prop.contains("credentials") || prop.contains("password") || prop.contains("pw")))
-                    .filter(prop -> prop.startsWith("fr.insee")
-                        || prop.startsWith("logging")
-                        || prop.startsWith("keycloak")
-                        || prop.startsWith("spring")
-                        || prop.startsWith("application")
-                        || prop.startsWith("project"))
-                    .sorted().forEach(prop -> log.info("{}: {}", prop, env.getProperty(prop)));
-                log.info("============================================================================");
-        }
-
-        @EventListener
-        public void handleApplicationReady(ApplicationReadyEvent event) {
-                log.info("=============== ERA  has successfully started. ===============");
-
-        }
-
 
 }
