@@ -186,7 +186,7 @@ import java.util.stream.Collectors;
                                 if (parentList.size() > 2) {
                                         List<Long> idParentsASupprimer = new ArrayList<>(parentList.subList(2, parentList.size()));
                                         for (Long idParent : idParentsASupprimer) {
-                                                log.debug("Individu avec plus que deux parents. On supprime les liens entre individu=" + idEnfant
+                                                log.debug("Individu avec plus que deux parents. Suppression liens entre individu=" + idEnfant
                                                     + " et individu=" + idParent);
                                                 inoutLienParentByIndividuId.get(idParent).remove(idEnfant);
                                                 inoutLienEnfantByIndividuId.get(idEnfant).remove(idParent);
@@ -206,7 +206,7 @@ import java.util.stream.Collectors;
                 for ( Long individuId : new ArrayList<>(mapA.keySet())  ) {
                         for (Long individuRelieId: mapA.get(individuId)) {
                                 if(!mapB.containsKey(individuRelieId) ||!mapB.get(individuRelieId).contains(individuId) ) {
-                                        log.info("On supprime le lien orphelin individu=" + individuId + " individurelie=" + individuRelieId);
+                                        log.info("Suppression du lien orphelin individu=" + individuId + " individurelie=" + individuRelieId);
                                         liensASupprimer.add(new ImmutablePair<>(individuId, individuRelieId));
                                 }
                         }
