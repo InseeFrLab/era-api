@@ -6,6 +6,7 @@ import fr.insee.era.extraction_rp_famille.dao.OdicDAO;
 import fr.insee.era.extraction_rp_famille.dao.OmerDAO;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
+import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueException;
 import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
@@ -45,6 +46,10 @@ import java.util.stream.Collectors;
 
                 //Récupération de la liste des UE à traiter
                 Collection<ReponseListeUEDto> toutesLesRIM = extractionServiceJSON.getAllRimForPeriod(dateDebut,dateFin);
+
+                //premier filtres : mail
+                toutesLesRIM.removeIf(reponseListeUEDto -> !(estValide(reponseListeUEDto)));
+
                 int nbRimTraitées=0;
                 try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(csvResultOutputStream))) {
                         //Ecriture du header CSV
@@ -65,10 +70,10 @@ import java.util.stream.Collectors;
                                 List<BIEntity> biomer = omerDAO.getBiEtLiensForRim(rim.getId(),conjointByIndividuID,inoutLienParentByIndividuId,inoutLienEnfantByIndividuId);
                                 List<BIEntity> biodic = odicDAO.getBiEtLiensForRim(rim.getId(),conjointByIndividuID,inoutLienParentByIndividuId,inoutLienEnfantByIndividuId);
 
-                                for (var bi : biomer) {
+                                for (BIEntity bi : biomer) {
                                         biEntityById.put(bi.getId(),bi);
                                 }
-                                for (var bi : biodic) {
+                                for (BIEntity bi : biodic) {
                                         if(biEntityById.containsKey(bi.getId())){
                                                 log.debug(String.format("bi[id=%s] existe dans OMER et ODIC; on garde la valeur OMER",bi.getId()));
                                         }
@@ -123,10 +128,13 @@ import java.util.stream.Collectors;
                                         line[col++] = null; //"NomReferent";
                                         line[col++] = null; //"PrenomReferent";
                                         line[col++] = rim.getMail(); //"MailReferent";
-                                        line[col++] = rimDetails.getNumvoiloc();
+                                        line[col++] = null;rimDetails.getNumvoiloc();
                                         line[col++] = null; //"IndiceRepetition";
-                                        line[col++] = rimDetails.getTypevoiloc();
-                                        line[col++] = rimDetails.getNomvoiloc();
+                                        line[col++] = null;//rimDetails.getTypevoiloc();
+                                        //HACK : on vient mettre l'adresse complète dans le champ libellé voie
+                                        //line[col++] = rimDetails.getNomvoiloc();
+                                        line[col++] = calculerAdresseComplete(rimDetails);
+
                                         line[col++] = null; //"ComplementAdresse";
                                         line[col++] = null; //"MentionSpeciale";
                                         line[col++] = rimDetails.getCpostloc();
@@ -263,6 +271,29 @@ import java.util.stream.Collectors;
                 return csvResultOutputStream;
         }
 
+        /**
+         * Validation de certain champs avec les REGEXP de MIT
+         * @param responseListeUe
+         * @return
+         */
+        private static boolean estValide(ReponseListeUEDto responseListeUe) {
+                boolean estValide=false;
+
+                //Courriel
+                if(  responseListeUe.getMail().length()<=80
+                        &&
+                    responseListeUe.getMail().matches("^[a-zA-Z0-9_]+([.-]{1}[a-zA-Z0-9_]+)*@[a-zA-Z0-9]+([.-]{1}[a-zA-Z0-9]+)*.[a-zA-Z]{2,}$")
+                )
+                {
+                        estValide=true;
+                }
+                else{
+                        log.info("Suppression de la rim avec courriel={}",responseListeUe.getMail());
+                        estValide=false;
+                }
+                return estValide;
+        }
+
         private static void updateHeader (){
 
                 //ajout des RPLISTEPRENOMS_1...N au header
@@ -294,5 +325,22 @@ import java.util.stream.Collectors;
                                 HEADER_RECORD.add("RPANAISENF" + j + "_" + i);
                         }
                 }
+        }
+
+        public static String calculerAdresseComplete(RIMDto rim){
+                 String adresse =  String.format("%s %s %s %s %s",
+                        rim.getNumvoiloc(),
+                        rim.getTypevoiloc(),
+                        rim.getNomvoiloc(),
+                        rim.getCpostloc(),
+                        rim.getCloc()
+                    );
+                 //TODO : constante?
+                 if(adresse.length()>38) {
+                         log.info("rim identifiantInternet={} : champ adresse trop long coupé adresseOriginale={}",
+                         rim.getIdentifiantInternet(), adresse);
+                         adresse=adresse.substring(0,37);
+                }
+                 return adresse;
         }
 }
