@@ -1,6 +1,10 @@
 package fr.insee.era.extraction_rp_famille.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import fr.insee.era.extraction_rp_famille.configuration.OdicDataSourceConfiguration;
+import fr.insee.era.extraction_rp_famille.configuration.OmerDataSourceConfiguration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.io.Resource;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueException;
@@ -36,6 +40,11 @@ public class ExtractionController {
         @Autowired ExtractionServiceJSON extractionServiceJSON;
         @Autowired ExtractionServiceCSV extractionServiceCSV;
 
+        @Value("${spring.datasource.odic.url}")
+        String odicURL;
+
+        @Value("${spring.datasource.omer.url}")
+        String homereURL;
 
         @GetMapping(value="/survey-units-for-period")
         @Operation(summary = "Récupération des répondants aux RP d'une période")
@@ -68,5 +77,15 @@ public class ExtractionController {
                     .body(ressource);
         }
 
-
+        @GetMapping(value="/info-bdd")
+        @Operation(summary = "Informations sur les bases de données du RP utilisées")
+        public ResponseEntity<String>  getInfoBDD(){
+                return ResponseEntity.ok(
+                    """
+                         BDD HOMERE:   %s
+                         BDD ODIC  :   %s
+                    """
+                        .formatted(homereURL,odicURL)
+                );
+        }
 }
