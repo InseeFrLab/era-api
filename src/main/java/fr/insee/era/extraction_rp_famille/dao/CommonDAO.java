@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
         @Autowired ParametrageConfiguration parametrageProperties;
 
         //-------------------------------------------------POUR JSON et COLEMAN----------------------------------------------------------//
-        public abstract List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin) throws ConfigurationException;
+        public abstract List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, Constantes.BI_SEXE sexe) throws ConfigurationException;
         public abstract List<BIEntity> getBiEtLiensForRim(
             Long rimId,
             Map<Long, Long> inoutConjointByIndividuID,
@@ -65,41 +65,51 @@ import java.util.stream.Collectors;
                 }
         }
 
-        protected List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc) throws ConfigurationException {
+        protected List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, JdbcTemplate jdbc, Constantes.BI_SEXE sexe) throws ConfigurationException {
 
                 jdbc.execute("DROP TABLE IF EXISTS tmp_era_communes_a_traiter_par_sexe ");
                 jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS tmp_era_communes_a_traiter_par_sexe (code_commune_insee varchar(255) NOT NULL,  irisar varchar(255), sexe varchar(255) NOT NULL) ");
 
                 List<Object[]> communesSexe = new ArrayList<>();
-                for (String id : parametrageProperties.getCommunesFemmes()) {
-                        communesSexe.add(new Object[] { id,null,Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
-                }
-                for (String id : parametrageProperties.getCommunesHommes()) {
-                        communesSexe.add(new Object[] { id, null,Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });
-                }
-                for (String irisFemme : parametrageProperties.getIrisFemmes()) {
-                        var splittedData = irisFemme.split("-");
-                        if(splittedData.length!=2){
-                                String message = "La conf d'un des iris femme n'est pas du type <codeCommune>-<IRIS>";
-                                log.error(message);
-                                throw new ConfigurationException(message);
+                if(sexe==null || sexe.equals(Constantes.BI_SEXE.BI_SEXE_HOMME)){
+                        for (String id : parametrageProperties.getCommunesHommes()) {
+                                communesSexe.add(new Object[] { id, null,Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });
                         }
-                        communesSexe.add(new Object[] { splittedData[0],splittedData[1],Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
-                }
-                for (String irisHomme : parametrageProperties.getIrisHommes()) {
-                        var splittedData = irisHomme.split("-");
-                        if(splittedData.length!=2){
-                                String message = "La conf d'un des iris homme n'est pas du type <codeCommune>-<IRIS>";
-                                log.error(message);
-                                throw new ConfigurationException(message);
+                        for (String irisHomme : parametrageProperties.getIrisHommes()) {
+                                var splittedData = irisHomme.split("-");
+                                if(splittedData.length!=2){
+                                        String message = "La conf d'un des iris homme n'est pas du type <codeCommune>-<IRIS>";
+                                        log.error(message);
+                                        throw new ConfigurationException(message);
+                                }
+                                communesSexe.add(new Object[] { splittedData[0],splittedData[1],Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });
                         }
-                        communesSexe.add(new Object[] { splittedData[0],splittedData[1],Constantes.BI_SEXE.BI_SEXE_HOMME.toString() });                }
+                }
+                if(sexe==null || sexe.equals(Constantes.BI_SEXE.BI_SEXE_FEMME)) {
+                        for (String id : parametrageProperties.getCommunesFemmes()) {
+                                communesSexe.add(new Object[] { id, null, Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
+                        }
+                        for (String irisFemme : parametrageProperties.getIrisFemmes()) {
+                                var splittedData = irisFemme.split("-");
+                                if (splittedData.length != 2) {
+                                        String message = "La conf d'un des iris femme n'est pas du type <codeCommune>-<IRIS>";
+                                        log.error(message);
+                                        throw new ConfigurationException(message);
+                                }
+                                communesSexe.add(new Object[] { splittedData[0], splittedData[1], Constantes.BI_SEXE.BI_SEXE_FEMME.toString() });
+                        }
+                }
 
-                log.info("Insertion dans la table temporaire des communes ");
+
+                log.info("Insertion dans la table temporaire des communes pour sexe={}",((sexe==null)?"hommes&femmes":sexe.toFullString()));
+                log.info("Configuration Communes/IRIS : {}",communesSexe.stream()
+                    .map(objects -> String.format("codeCommune=%s irisar=%s sexe=%s", objects[0], objects[1],objects[2]))
+                    .collect( Collectors.joining( "," ) )
+                );
                 jdbc.batchUpdate("INSERT INTO tmp_era_communes_a_traiter_par_sexe VALUES(?,?,?)", communesSexe);
                 log.info("Recuperation des RIMs (ayant un mail renseigné)");
                 String sql =
-                    "select distinct r.id,r.identifiant,  b.sexe, i.mail"
+                    "select distinct r.id,r.identifiant,  b.sexe, regexp_replace(i.mail, '\\s', '', 'g')  mail"
                         + " from   reponseinternetmenages r, bulletinindividuels b ,  internautes i, tmp_era_communes_a_traiter_par_sexe tmp "
                         + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.code_commune_insee "
                         + " and (tmp.irisar is null or tmp.irisar=r.irisar) "

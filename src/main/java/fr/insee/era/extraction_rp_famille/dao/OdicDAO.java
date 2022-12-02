@@ -3,6 +3,7 @@ package fr.insee.era.extraction_rp_famille.dao;
 import fr.insee.era.extraction_rp_famille.configuration.OdicDataSourceConfiguration;
 import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
+import fr.insee.era.extraction_rp_famille.model.Constantes;
 import fr.insee.era.extraction_rp_famille.model.dto.RIMDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.exception.ConfigurationException;
@@ -26,12 +27,12 @@ public class OdicDAO extends CommonDAO{
         @Autowired
         private OdicDataSourceConfiguration conf;
 
-        public List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin) throws ConfigurationException {
+        public List<ReponseListeUEDto> getIdRIMetInternetForPeriod(Date dateDebut, Date dateFin, Constantes.BI_SEXE sexe) throws ConfigurationException {
                 log.info("getIdRIMetInternetForPeriod ODIC");
 
                 JdbcTemplate jdbcTemplate1 = new JdbcTemplate(conf.odicDataSource());
 
-                return getIdRIMetInternetForPeriod(dateDebut,dateFin,jdbcTemplate1);
+                return getIdRIMetInternetForPeriod(dateDebut,dateFin,jdbcTemplate1, sexe);
         }
 
         public  List<BIEntity> getBiEtLiensForRim(

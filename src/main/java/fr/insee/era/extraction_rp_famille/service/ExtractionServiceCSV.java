@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
         @Autowired ExtractionServiceJSON extractionServiceJSON;
         @Autowired ParametrageConfiguration parametrageProperties;
 
-        public ByteArrayOutputStream getAllRimForPeriodAsCSV(Date dateDebut, Date dateFin, String questionnaireId)
+        public ByteArrayOutputStream getAllRimForPeriodAsCSV(Date dateDebut, Date dateFin, Constantes.BI_SEXE sexe, String questionnaireId)
             throws RimInconnueException, CommuneInconnueException, IOException, ConfigurationException {
                 log.info("Extraction CSV entre dateDebut={} et dateFin={}",dateDebut,dateFin);
                 //On doit adapter le header au nombre max de personnes et au nb max d'enfants
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
                 ByteArrayOutputStream csvResultOutputStream= new ByteArrayOutputStream();
 
                 //Récupération de la liste des UE à traiter
-                Collection<ReponseListeUEDto> toutesLesRIM = extractionServiceJSON.getAllRimForPeriod(dateDebut,dateFin);
+                Collection<ReponseListeUEDto> toutesLesRIM = extractionServiceJSON.getAllRimForPeriod(dateDebut,dateFin,sexe);
 
                 //premier filtres : mail
                 toutesLesRIM.removeIf(reponseListeUEDto -> !(estValide(reponseListeUEDto)));
@@ -91,12 +91,6 @@ import java.util.stream.Collectors;
                                         throw new RimInconnueException(rim.getId());
                                 }
 
-                                Constantes.BI_SEXE sexe = parametrageProperties.getSexeForCommuneIris(rimDetails.getCodeCommune(),rimDetails.getIris());
-                                if(sexe==null){
-                                        throw new CommuneInconnueException(rimDetails.getCodeCommune(),rimDetails.getIris());
-                                }
-
-
                                 if (!biEntityById.isEmpty()) {
 
                                         //Déjà as on un pax majeur du bon sexe???
@@ -133,7 +127,7 @@ import java.util.stream.Collectors;
                                         line[col++] = null;//rimDetails.getTypevoiloc();
                                         //HACK : on vient mettre l'adresse complète dans le champ libellé voie
                                         //line[col++] = rimDetails.getNomvoiloc();
-                                        line[col++] = calculerAdresseComplete(rimDetails);
+                                        line[col++] = calculerAdresseSansCommune(rimDetails);
 
                                         line[col++] = null; //"ComplementAdresse";
                                         line[col++] = null; //"MentionSpeciale";
@@ -266,6 +260,8 @@ import java.util.stream.Collectors;
                                         log.warn("Pas de BI pour idRim=" + rim.getId());
                                 }
                         }
+                        log.info("FIN  {} / {} ", nbRimTraitées, toutesLesRIM.size());
+
                 }
 
                 return csvResultOutputStream;
@@ -327,19 +323,18 @@ import java.util.stream.Collectors;
                 }
         }
 
-        public static String calculerAdresseComplete(RIMDto rim){
-                 String adresse =  String.format("%s %s %s %s %s",
+        public static String calculerAdresseSansCommune(RIMDto rim){
+                 String adresse =  String.format("%s %s %s",
                         rim.getNumvoiloc(),
                         rim.getTypevoiloc(),
-                        rim.getNomvoiloc(),
-                        rim.getCpostloc(),
-                        rim.getCloc()
-                    );
+                        rim.getNomvoiloc()
+                    ).replaceAll("\\p{Zs}+", " ");
                  //TODO : constante?
-                 if(adresse.length()>38) {
-                         log.info("rim identifiantInternet={} : champ adresse trop long coupé adresseOriginale={}",
-                         rim.getIdentifiantInternet(), adresse);
-                         adresse=adresse.substring(0,37);
+                int maxSize=38;
+                 if(adresse.length()>maxSize) {
+                         log.info("rim identifiantInternet={} : champ adresse trop long coupé à {} caractères adresseOriginale={}",
+                         rim.getIdentifiantInternet(),maxSize, adresse);
+                         adresse=adresse.substring(0,maxSize-1);
                 }
                  return adresse;
         }

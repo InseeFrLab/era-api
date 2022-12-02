@@ -36,17 +36,17 @@ import java.util.stream.Collectors;
         @Autowired ParametrageConfiguration parametrageProperties;
 
 
-        public Collection<ReponseListeUEDto> getAllRimForPeriod(Date dateDebut, Date dateFin) throws DataAccessException, ConfigurationException {
+        public Collection<ReponseListeUEDto> getAllRimForPeriod(Date dateDebut, Date dateFin,Constantes.BI_SEXE sexe) throws DataAccessException, ConfigurationException {
 
                 HashMap<Long, ReponseListeUEDto> reponseByIdRim = new HashMap<>();
 
 
-                List<ReponseListeUEDto> listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
+                List<ReponseListeUEDto> listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin,sexe);
                 listeOMER.stream().forEach(ue -> reponseByIdRim.put(ue.getId(),ue));
 
                 //Pour compter le nombre d'UE issues d'ODIC
                 AtomicInteger nbUeODIC = new AtomicInteger(0);
-                var listeODIC = odicDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin);
+                var listeODIC = odicDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin,sexe);
                 //on parcours les UE d'ODIC et on ne garde que celles qui ne sont pas déjà présentes dans OMER
                 listeODIC.forEach(ue -> {
                         if (reponseByIdRim.containsKey(ue.getId())) {

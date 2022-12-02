@@ -1,10 +1,8 @@
 package fr.insee.era.extraction_rp_famille.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import fr.insee.era.extraction_rp_famille.configuration.OdicDataSourceConfiguration;
-import fr.insee.era.extraction_rp_famille.configuration.OmerDataSourceConfiguration;
+import fr.insee.era.extraction_rp_famille.model.Constantes;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.io.Resource;
 import fr.insee.era.extraction_rp_famille.model.dto.ReponseListeUEDto;
 import fr.insee.era.extraction_rp_famille.model.exception.CommuneInconnueException;
@@ -51,7 +49,7 @@ public class ExtractionController {
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
             throws DataAccessException, ConfigurationException {
                 log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} ",SecurityContextHolder.getContext().getAuthentication().getName(), dateDebut, dateFin);
-                return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getAllRimForPeriod(dateDebut, dateFin));
+                return ResponseEntity.status(HttpStatus.OK).body(extractionServiceJSON.getAllRimForPeriod(dateDebut, dateFin,null));
         }
 
         @GetMapping(value="/{id}")
@@ -64,13 +62,15 @@ public class ExtractionController {
 
 
         @GetMapping(value="/survey-units-for-period-csv" , produces = "text/csv")
-        @Operation(summary = "Récupération de toutes les unités enquêtées d'une période")
-        public ResponseEntity<Resource>  getAllSUForPeriodAsCSV(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin,@RequestParam("idCampaign ") String questionnaireId)
+        @Operation(summary = "Récupération de toutes les unités enquêtées d'une période selon le sexe 1==Homme ; 2==Femme")
+        public ResponseEntity<Resource>  getAllSUForPeriodAsCSV(@RequestParam("dateDebut") Date dateDebut, @RequestParam("dateFin") Date dateFin,@RequestParam("sexe") String sexe, @RequestParam("idCampaign ") String questionnaireId)
             throws IOException, RimInconnueException, CommuneInconnueException, ConfigurationException {
-                ByteArrayOutputStream csvByteArrayOutputStream = extractionServiceCSV.getAllRimForPeriodAsCSV(dateDebut, dateFin,questionnaireId);
+
+                log.info("getAllSUForPeriod utilisateur={} dateDebut={} dateFin={} sexe={}",SecurityContextHolder.getContext().getAuthentication().getName(), dateDebut, dateFin,sexe);
+                ByteArrayOutputStream csvByteArrayOutputStream = extractionServiceCSV.getAllRimForPeriodAsCSV(dateDebut, dateFin,Constantes.BI_SEXE.fromString(sexe),questionnaireId);
                 Resource ressource = new ByteArrayResource(csvByteArrayOutputStream.toByteArray());
 
-                String fileName = String.format("extraction_%s_%s_%s.csv",questionnaireId,dateDebut,dateFin);
+                String fileName = String.format("extraction_%s_%S_%s_%s.csv",questionnaireId,Constantes.BI_SEXE.fromString(sexe).toFullString(),dateDebut,dateFin);
                 return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+fileName)
                     .contentType(MediaType.parseMediaType("text/csv"))

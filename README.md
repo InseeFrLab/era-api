@@ -249,3 +249,7 @@ maximum 12 children by person
 We discard links found in table lienindividus where there is no mirror link
 ex: Parent -> Child must have a Child->Parent equivalent for the same persons
 
+#### Emails
+
+blank or empty mails are filtered
+Any white space in an email adresse is removed (ex aa bb@toto.org becomes aabb@toto.org)
