@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j @Service public class ExtractionServiceCSV {
 
-        static List<String> HEADER_RECORD = new ArrayList<String>(
+        List<String> HEADER_RECORD = new ArrayList<>(
             Arrays.asList("Identifiant", "IdModele", "Internaute" , "IdLot", "CiviliteReferent", "NomReferent", "PrenomReferent", "MailReferent", "NumeroVoie",
                 "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe",
                 "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST"));
@@ -36,11 +36,13 @@ import java.util.stream.Collectors;
         @Autowired ExtractionServiceJSON extractionServiceJSON;
         @Autowired ParametrageConfiguration parametrageProperties;
 
+        ExtractionServiceCSV(){
+                //On doit adapter le header au nombre max de personnes et au nb max d'enfants
+                updateHeader();
+        }
         public ByteArrayOutputStream getAllRimForPeriodAsCSV(Date dateDebut, Date dateFin, Constantes.BI_SEXE sexe, String questionnaireId)
             throws RimInconnueException, CommuneInconnueException, IOException, ConfigurationException {
                 log.info("Extraction CSV entre dateDebut={} et dateFin={}",dateDebut,dateFin);
-                //On doit adapter le header au nombre max de personnes et au nb max d'enfants
-                updateHeader();
 
                 ByteArrayOutputStream csvResultOutputStream= new ByteArrayOutputStream();
 
@@ -58,7 +60,7 @@ import java.util.stream.Collectors;
                         //Traitement de chaque rim individuellement
                         for(ReponseListeUEDto rim : toutesLesRIM){
                                 nbRimTraitées++;
-                                if(  nbRimTraitées % 1000 == 1) {
+                                if(  nbRimTraitées % 500 == 1) {
                                         log.info("traitement de la RIM {} / {} ", nbRimTraitées, toutesLesRIM.size());
                                 }
                                 //Récupération des détails de la RIM
@@ -290,7 +292,7 @@ import java.util.stream.Collectors;
                 return estValide;
         }
 
-        private static void updateHeader (){
+        private void updateHeader (){
 
                 //ajout des RPLISTEPRENOMS_1...N au header
                 for (long i = 1; i <= Constantes.NB_MAX_PERSONNES_ENQUETEES; i++) {
@@ -321,6 +323,7 @@ import java.util.stream.Collectors;
                                 HEADER_RECORD.add("RPANAISENF" + j + "_" + i);
                         }
                 }
+                log.info("header={}",HEADER_RECORD);
         }
 
         public static String calculerAdresseSansCommune(RIMDto rim){
