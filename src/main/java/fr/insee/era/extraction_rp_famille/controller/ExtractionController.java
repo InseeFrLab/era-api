@@ -1,6 +1,7 @@
 package fr.insee.era.extraction_rp_famille.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import fr.insee.era.extraction_rp_famille.configuration.ParametrageConfiguration;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -44,6 +45,8 @@ public class ExtractionController {
         @Value("${spring.datasource.omer.url}")
         String homereURL;
 
+        @Autowired ParametrageConfiguration parametrageConfiguration;
+
         @GetMapping(value="/survey-units-for-period")
         @Operation(summary = "Récupération des répondants aux RP d'une période")
         public ResponseEntity<Collection<ReponseListeUEDto>>  getAllSUForPeriod(@RequestParam("startDate") Date dateDebut, @RequestParam("endDate") Date dateFin)
@@ -77,15 +80,24 @@ public class ExtractionController {
                     .body(ressource);
         }
 
-        @GetMapping(value="/info-bdd")
-        @Operation(summary = "Informations sur les bases de données du RP utilisées")
-        public ResponseEntity<String>  getInfoBDD(){
+        @GetMapping(value="/info-parametrage")
+        @Operation(summary = "Informations sur les bases de données du RP utilisées et le paramétrage des communes et iris")
+        public ResponseEntity<String>  getInfoParametreage(){
                 return ResponseEntity.ok(
                     """
                          BDD HOMERE:   %s
                          BDD ODIC  :   %s
+                         COMMUNES HOMMES : %s
+                         COMMUNES FEMMES : %s
+                         IRIS HOMMES : %s
+                         IRIS FEMMES : %s
                     """
-                        .formatted(homereURL,odicURL)
+                        .formatted(homereURL,odicURL,
+                            parametrageConfiguration.getCommunesHommes(),
+                            parametrageConfiguration.getCommunesFemmes(),
+                            parametrageConfiguration.getIrisHommes(),
+                            parametrageConfiguration.getIrisFemmes()
+                        )
                 );
         }
 }
