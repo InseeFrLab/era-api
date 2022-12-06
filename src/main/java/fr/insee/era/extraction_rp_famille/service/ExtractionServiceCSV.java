@@ -295,12 +295,12 @@ import java.util.stream.Collectors;
         private void updateHeader (){
 
                 //ajout des RPLISTEPRENOMS_1...N au header
-                for (long i = 1; i <= Constantes.NB_MAX_PERSONNES_ENQUETEES; i++) {
+                for (long i = 0; i < Constantes.NB_MAX_PERSONNES_ENQUETEES; i++) {
                         HEADER_RECORD.add("RPLISTEPRENOMS_" + i);
                 }
 
                 //ajout des entêtes spécifiques
-                for (long i = 1; i <= Constantes.NB_MAX_PERSONNES_ENQUETEES; i++) {
+                for (long i = 0; i < Constantes.NB_MAX_PERSONNES_ENQUETEES; i++) {
                         //Conjoint
                         HEADER_RECORD.add("RPPRENOMCONJ_" + i);
                         HEADER_RECORD.add("RPSEXCONJ_" + i);
@@ -317,7 +317,7 @@ import java.util.stream.Collectors;
                         HEADER_RECORD.add("RPANAISPAR2_" + i);
 
                         //Enfants
-                        for (long j = 1; j <= Constantes.NB_MAX_ENFANT_PAR_PERSONNE; j++) {
+                        for (long j = 0; j < Constantes.NB_MAX_ENFANT_PAR_PERSONNE; j++) {
                                 HEADER_RECORD.add("RPPRENOMENF" + j + "_" + i);
                                 HEADER_RECORD.add("RPSEXENF" + j + "_" + i);
                                 HEADER_RECORD.add("RPANAISENF" + j + "_" + i);
