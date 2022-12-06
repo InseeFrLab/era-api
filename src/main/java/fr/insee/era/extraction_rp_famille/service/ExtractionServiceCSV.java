@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j @Service public class ExtractionServiceCSV {
 
         List<String> HEADER_RECORD = new ArrayList<>(
-            Arrays.asList("Identifiant", "IdModele", "Internaute" , "IdLot", "CiviliteReferent", "NomReferent", "PrenomReferent", "MailReferent", "NumeroVoie",
+            Arrays.asList("Identifiant", "IdModele", "IdeC" , "IdLot", "CiviliteReferent", "NomReferent", "PrenomReferent", "MailReferent", "NumeroVoie",
                 "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe",
                 "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST"));
         @Autowired OmerDAO omerDAO;
@@ -118,7 +118,7 @@ import java.util.stream.Collectors;
                                         int col = 0;
                                         line[col++] = String.valueOf(rim.getId()); //"Identifiant";
                                         line[col++] = questionnaireId; //"IdModele";
-                                        line[col++] = rim.getInternaute(); //"Internaute
+                                        line[col++] = rim.getInternaute(); //"IdeC (internaute ; identifiant internet...)
                                         line[col++] = null; //"IDLot";
                                         line[col++] = null; //"CiviliteReferent";
                                         line[col++] = null; //"NomReferent";
