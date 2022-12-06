@@ -317,7 +317,7 @@ import java.util.stream.Collectors;
                         HEADER_RECORD.add("RPANAISPAR2_" + i);
 
                         //Enfants
-                        for (long j = 0; j < Constantes.NB_MAX_ENFANT_PAR_PERSONNE; j++) {
+                        for (long j = 1; j <= Constantes.NB_MAX_ENFANT_PAR_PERSONNE; j++) {
                                 HEADER_RECORD.add("RPPRENOMENF" + j + "_" + i);
                                 HEADER_RECORD.add("RPSEXENF" + j + "_" + i);
                                 HEADER_RECORD.add("RPANAISENF" + j + "_" + i);
