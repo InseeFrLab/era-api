@@ -119,7 +119,7 @@ import java.util.stream.Collectors;
                                         line[col++] = String.valueOf(rim.getId()); //"Identifiant";
                                         line[col++] = questionnaireId; //"IdModele";
                                         line[col++] = rim.getInternaute(); //"IdeC (internaute ; identifiant internet...)
-                                        line[col++] = null; //"IDLot";
+                                        line[col++] = sexe.toString(); //"IDLot";
                                         line[col++] = null; //"CiviliteReferent";
                                         line[col++] = null; //"NomReferent";
                                         line[col++] = null; //"PrenomReferent";
