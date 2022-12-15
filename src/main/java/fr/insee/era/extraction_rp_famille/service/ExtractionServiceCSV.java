@@ -185,7 +185,6 @@ import java.util.stream.Collectors;
 
                                                 //Parents
                                                 //parents de l'individu (triés du plus vieux au plus jeune : règle métier)
-                                                //TODO : mettre un TU sur le tri
                                                 List<Long> parents = inoutLienEnfantByIndividuId.get(bi.getId());
                                                 BIEntity parent1=null;
                                                 BIEntity parent2 = null;
@@ -194,7 +193,9 @@ import java.util.stream.Collectors;
                                                         if(parents.size()>=2){
                                                                 BIEntity parentA = biEntityById.get(parents.get(0));
                                                                 BIEntity parentB = biEntityById.get(parents.get(1));
-                                                                if(Integer.valueOf(parentA.getAnai())>Integer.valueOf(parentB.getAnai())){
+                                                                //Parent A est né avant parent 2 (une année plus "petite")
+                                                                //On l'écrit donc en 1er
+                                                                if(Integer.valueOf(parentA.getAnai())<Integer.valueOf(parentB.getAnai())){
                                                                         parent1 = parentA;
                                                                         parent2= parentB;
                                                                 }
