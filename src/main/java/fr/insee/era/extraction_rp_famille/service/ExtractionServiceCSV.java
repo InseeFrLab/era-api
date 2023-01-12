@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
         List<String> HEADER_RECORD = new ArrayList<>(
             Arrays.asList("Identifiant", "IdModele", "IdeC" , "IdLot", "CiviliteReferent", "NomReferent", "PrenomReferent", "MailReferent", "NumeroVoie",
                 "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe",
-                "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST"));
+                "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1", "whoAnswers2", "whoAnswers3"));
         @Autowired OmerDAO omerDAO;
         @Autowired OdicDAO odicDAO;
 
@@ -144,9 +144,20 @@ import java.util.stream.Collectors;
                                         line[col++] = sexe.toFullString(); //CSV : TYPE_QUEST
                                         line[col++] = String.valueOf(biEnquetes.size()); //RPNBQUEST
 
+                                        //Whoanswers
+                                        if(Constantes.BI_SEXE.BI_SEXE_FEMME.equals(sexe)){
+                                                line[col++] = "Dans votre foyer, chaque femme âgée de 18 ans ou plus doit répondre : "; //whoAnswers1
+                                        }
+                                        else{
+                                                line[col++] = "Dans votre foyer, chaque homme âgé de 18 ans ou plus doit répondre : "; //whoAnswers1
+                                        }
+
+                                        String listePrenom = String.join(", ",biEnquetes.stream().map(BIEntity::getPrenom).collect(Collectors.toList()));
+                                        line[col++] = listePrenom; //whoAnswers2
+                                        line[col++] = ""; //whoAnswers3
+
                                         //Ensuite on écrit N fois la liste des prénoms
                                         //Suivis par d'éventuelles colonnes vides  (pour les familles avec moins de personnes concernées)
-                                        String listePrenom = String.join(", ",biEnquetes.stream().map(BIEntity::getPrenom).collect(Collectors.toList()));
                                         int i = 0;
                                         do {
                                                 if (i < biEnquetes.size()) {
