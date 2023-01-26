@@ -47,6 +47,8 @@ import java.util.stream.Collectors;
                 ByteArrayOutputStream csvResultOutputStream= new ByteArrayOutputStream();
 
                 //Récupération de la liste des UE à traiter
+                //Malheureusment, avec la suppression des BI dans OMER et leur déplacement dans ODIC
+                //on n'a pas pu filtrer ces RIM sur le sexe, l'age et le tableauabcd
                 Collection<ReponseListeUEDto> toutesLesRIM = extractionServiceJSON.getAllRimForPeriod(dateDebut,dateFin,sexe);
 
                 //premier filtres : mail
