@@ -40,7 +40,8 @@ import java.util.stream.Collectors;
 
                 HashMap<Long, ReponseListeUEDto> reponseByIdRim = new HashMap<>();
 
-
+                //Malheureusment, avec la suppression des BI dans OMER et leur déplacement dans ODIC
+                //on n'a pas pu filtrer ces RIM sur le sexe, l'age et le tableauabcd
                 List<ReponseListeUEDto> listeOMER = omerDAO.getIdRIMetInternetForPeriod(dateDebut, dateFin,sexe);
                 listeOMER.stream().forEach(ue -> reponseByIdRim.put(ue.getId(),ue));
 

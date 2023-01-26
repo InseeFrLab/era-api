@@ -109,12 +109,17 @@ import java.util.stream.Collectors;
                 jdbc.batchUpdate("INSERT INTO tmp_era_communes_a_traiter_par_sexe VALUES(?,?,?)", communesSexe);
                 log.info("Recuperation des RIMs (ayant un mail renseigné)");
                 String sql =
-                    "select distinct r.id,r.identifiant,  b.sexe, regexp_replace(i.mail, '\\s', '', 'g')  mail"
-                        + " from   reponseinternetmenages r, bulletinindividuels b ,  internautes i, tmp_era_communes_a_traiter_par_sexe tmp "
+                    "select distinct r.id,r.identifiant,  "
+                        //+ " b.sexe,"
+                        + " tmp.sexe, "
+                        + " regexp_replace(i.mail, '\\s', '', 'g')  mail"
+                        + " from   reponseinternetmenages r, "
+                        //+ " bulletinindividuels b ,"
+                        + "  internautes i, tmp_era_communes_a_traiter_par_sexe tmp "
                         + " where   r.dateenvoi between ? and ? " + " and     r.codedepartement||r.codecommune  = tmp.code_commune_insee "
                         + " and (tmp.irisar is null or tmp.irisar=r.irisar) "
-                        + " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
-                        + Constantes.ANNEE_NAISSANCE_MAJEUR + "' "
+                        //+ " and     b.feuillelogement = r.id " + " and     b.tableauabcd='A' " + " and     b.sexe = tmp.sexe " + " and     b.anai <= '"
+                        //+ Constantes.ANNEE_NAISSANCE_MAJEUR + "' "
                         + " and r.idinternaute  = i.id "
                         // enlever les personnes sans mail car pour famille on ne peut rien en faire
                         + " and (LTRIM(i.mail) <> '')  "
