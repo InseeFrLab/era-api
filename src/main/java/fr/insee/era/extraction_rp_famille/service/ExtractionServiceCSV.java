@@ -21,10 +21,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Date;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j @Service public class ExtractionServiceCSV {
 
+
+        static Pattern patternCodePostal = Pattern.compile("^\\d{5}$");
         List<String> HEADER_RECORD = new ArrayList<>(
             Arrays.asList("Identifiant", "IdModele", "IdeC" , "IdLot", "CiviliteReferent", "NomReferent", "PrenomReferent", "MailReferent", "NumeroVoie",
                 "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe",
@@ -135,7 +139,7 @@ import java.util.stream.Collectors;
 
                                         line[col++] = null; //"ComplementAdresse";
                                         line[col++] = null; //"MentionSpeciale";
-                                        line[col++] = rimDetails.getCpostloc();
+                                        line[col++] = nettoyerCodePostal(rimDetails.getCpostloc());
                                         line[col++] = rimDetails.getCloc();
 
                                         line[col++] = null; //NomUe
@@ -354,5 +358,18 @@ import java.util.stream.Collectors;
                          adresse=adresse.substring(0,maxSize-1);
                 }
                  return adresse;
+        }
+
+        /**
+         * remplace un code postal invalide par une chaine vide
+         * @param codePostal
+         * @return
+         */
+        public static String nettoyerCodePostal(String codePostal){
+                Matcher m = patternCodePostal.matcher(codePostal);
+                if(m.matches())
+                        return codePostal;
+                else
+                        return "";
         }
 }
