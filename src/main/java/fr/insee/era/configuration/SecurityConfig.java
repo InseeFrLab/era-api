@@ -33,7 +33,7 @@ public class SecurityConfig {
 
 
     //Par défaut, spring sécurity prefixe les rôles avec cette chaine
-    private String ROLE_PREFIX = "ROLE_";
+    private static final String ROLE_PREFIX = "ROLE_";
 
     @Autowired
     InseeSecurityTokenProperties inseeSecurityTokenProperties;
@@ -45,14 +45,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf().disable()
+        http.csrf(csrf -> csrf.disable()) //NOSONAR
                 .authorizeHttpRequests(authorize ->
                         authorize.requestMatchers(whiteList).permitAll()
                                 .requestMatchers("/extraction-survey-unit/**").hasRole(administrateurRPRole)
                                 .requestMatchers("/census-extraction/**").hasRole(administrateurRPRole)
                 )
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt().jwtAuthenticationConverter(jwtAuthenticationConverter()));
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
     }
 
@@ -82,7 +82,6 @@ public class SecurityConfig {
                             new ArrayList<>());
                     //if we need to add customs roles to every connected user we could define this variable (static
                     // or from properties)
-                    //roles.addAll(defaultRolesForUsers);
                     return roles.stream().map(s -> new GrantedAuthority() {
                         @Override
                         public String getAuthority() {
@@ -93,7 +92,7 @@ public class SecurityConfig {
                         public String toString() {
                             return getAuthority();
                         }
-                    }).collect(Collectors.toList());
+                    }).collect(Collectors.toCollection(ArrayList::new));
                 } catch (ClassCastException e) {
                     // role path not correctly found, assume that no role for this user
                     return new ArrayList<>();

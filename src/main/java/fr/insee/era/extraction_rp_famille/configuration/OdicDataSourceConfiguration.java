@@ -15,9 +15,7 @@ public class OdicDataSourceConfiguration {
         @Bean
         @ConfigurationProperties("spring.datasource.odic")
         public DataSourceProperties odicDataSourceProperties() {
-                DataSourceProperties con =  new DataSourceProperties();
-//                con.setType(SingleConnectionDataSource.class);
-                return con ;
+                return new DataSourceProperties();
         }
 
         @Bean

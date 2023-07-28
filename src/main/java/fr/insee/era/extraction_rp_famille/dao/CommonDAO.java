@@ -314,7 +314,7 @@ public abstract class CommonDAO {
         List<Map<String, Object>> individuals = new ArrayList<>(individualsWithTies);
         individualsWithoutTies.stream()
                 .filter(i ->
-                        individuals.stream().noneMatch(i2 -> ((Long) i2.get("id")).equals((Long) i.get("id"))))
+                        individuals.stream().noneMatch(i2 -> (i2.get("id")).equals(i.get("id"))))
                 .forEach(individuals::add);
 
         List<Long> individualIds = individuals.stream().map(i -> (Long) i.get("id")).distinct().toList();
