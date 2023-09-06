@@ -150,7 +150,7 @@ public class CensusCsvAdapter {
             externalsHeader.addAll(getExternalsHeaderByType("PAR2", i, true, false));
 
             //Enfants
-            for (int j = 1; j <= BusinessConstant.MAX_SURVEYED_PERSONS; j++) {
+            for (int j = 1; j <= BusinessConstant.MAX_CHILDREN_PER_PERSON; j++) {
                 externalsHeader.addAll(getExternalsHeaderByType("ENF" + j, i, false, false));
             }
         }
