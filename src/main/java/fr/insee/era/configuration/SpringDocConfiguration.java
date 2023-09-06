@@ -29,20 +29,12 @@ public class SpringDocConfiguration {
 
 
   public static final String OAUTHSCHEME = "oAuth";
-  //public final String SCHEMEBASIC = "basic";
 
   @Bean
   public OpenAPI customOpenAPIBasicAndOIDC() {
     final OpenAPI openapi = createOpenAPI();
     openapi.components(
         new Components()
-            /*.addSecuritySchemes(
-                SCHEMEBASIC,
-                new SecurityScheme()
-                    .type(SecurityScheme.Type.HTTP)
-                    .scheme(SCHEMEBASIC)
-                    .in(SecurityScheme.In.HEADER)
-                    .description("Authentification Basic"))*/
             .addSecuritySchemes(
                 OAUTHSCHEME,
                 new SecurityScheme()
