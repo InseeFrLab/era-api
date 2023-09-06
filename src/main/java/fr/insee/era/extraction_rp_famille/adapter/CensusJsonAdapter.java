@@ -85,7 +85,7 @@ public class CensusJsonAdapter {
 
             // Get children
             Map<Integer,IndividualFormDto> children = responseNetUserDto.getListOfChildrenByIndividual(individual);
-            for (int i = 1; i <= BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
+            for (int i = 1; i <= BusinessConstant.MAX_CHILDREN_PER_PERSON; i++) {
                 loopVariableMapFirstNameChildren.get(i).getValues().add(children.get(i).getFirstName());
                 loopVariableMapBirthYearChildren.get(i).getValues().add(children.get(i).getBirthYear());
             }
