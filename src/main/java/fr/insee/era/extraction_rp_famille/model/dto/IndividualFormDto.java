@@ -1,8 +1,10 @@
 package fr.insee.era.extraction_rp_famille.model.dto;
 
+import fr.insee.era.extraction_rp_famille.model.enums.RelationshipType;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Builder
@@ -22,5 +24,16 @@ public class IndividualFormDto {
     private boolean surveyed;
     private boolean major;
     private List<RelationshipDto> familyTies;
+
+    public long countChildren() {
+        return familyTies.stream().filter(r -> r.getRelationshipType() == RelationshipType.PARENT).count();
+    }
+
+    public LocalDate getBirthDate() {
+        return LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth), Integer.parseInt(birthDay));
+    }
+
+
+
 
 }

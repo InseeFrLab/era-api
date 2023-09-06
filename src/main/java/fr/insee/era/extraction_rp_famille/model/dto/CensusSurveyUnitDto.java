@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CensusJsonDto {
+public class CensusSurveyUnitDto {
     private Long id;
     private String numvoiloc;
     private String bisterloc;
@@ -20,5 +20,5 @@ public class CensusJsonDto {
     private String mail;
     private String identifiantCompte;
     @JsonSerialize(using = ExternalSerializer.class)
-    private ExternalJsonDto externals;
+    private ExternalsVariables externals;
 }

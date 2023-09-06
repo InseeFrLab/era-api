@@ -35,7 +35,6 @@ public class IndividualServiceImpl implements IndividualService {
         individuals.addAll(omerIndividuals);
         // filter individuals by business rules
         individuals = businessRulesService.filterIndividual(individuals, gender);
-        log.info("Number of individuals for response {}: {}", id, individuals.size());
         return individuals;
     }
 }
