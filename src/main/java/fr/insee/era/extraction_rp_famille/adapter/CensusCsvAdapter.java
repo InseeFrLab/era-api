@@ -127,8 +127,8 @@ public class CensusCsvAdapter {
 
     public String[] writeHeader() {
 
-        List<String> commonHeader = new ArrayList<>(Arrays.asList("Identifiant", "IdModele", "IdeC", "IdLot",
-                "CiviliteReferent", "NomReferent", "PrenomReferent", "MailReferent", "NumeroVoie", "IndiceRepetition"
+        List<String> commonHeader = new ArrayList<>(Arrays.asList("IdentifiantExterne", "IdModele", "IdeC", "IdLot",
+                "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition"
                 , "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune",
                 "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1",
                 "whoAnswers2", "whoAnswers3"));
@@ -245,7 +245,7 @@ public class CensusCsvAdapter {
     public String[] writeHeaderSupplements(int maxPerson, int maxChildren) {
 
         List<String> headers = new ArrayList<>();
-        headers.add("Identifiant");
+        headers.add("IdentifiantExterne");
         for (int i = 0; i < maxPerson; i++) {
             //Surveyed
             headers.addAll(getExternalsHeaderByType("ENQ", i, true, true));
