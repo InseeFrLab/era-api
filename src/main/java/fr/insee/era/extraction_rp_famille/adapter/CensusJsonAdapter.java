@@ -1,6 +1,5 @@
 package fr.insee.era.extraction_rp_famille.adapter;
 
-import fr.insee.era.extraction_rp_famille.model.BusinessConstant;
 import fr.insee.era.extraction_rp_famille.model.dto.*;
 import fr.insee.era.extraction_rp_famille.model.enums.GenderType;
 import org.springframework.stereotype.Service;
@@ -41,11 +40,16 @@ public class CensusJsonAdapter {
         SimpleVariable typeQuest = SimpleVariable.builder().name("TYPE_QUEST").value(gender.getValue()).build();
         SimpleVariable rpTypeQuest = SimpleVariable.builder().name("RPTYPEQUEST").value(gender.getLabel()).build();
         SimpleVariable rpNbQuest = SimpleVariable.builder().name("RPNBQUEST").value(Integer.toString(listOfSurveyedMajor.size())).build();
-        List<SimpleVariable> simpleVariables = List.of(typeQuest, rpTypeQuest, rpNbQuest);
+        String firstNameList = listOfSurveyedMajor.stream().map(IndividualFormDto::getFirstName).collect(Collectors.joining(", "));
+        SimpleVariable rpListPrenoms = SimpleVariable.builder().name("RPLISTEPRENOMS").value(firstNameList).build();
+        List<SimpleVariable> simpleVariables = List.of(typeQuest, rpTypeQuest, rpNbQuest, rpListPrenoms);
 
         // Loop Variables
-        LoopVariable rpListePrenoms = LoopVariable.builder().name("RPLISTEPRENOMS").values(new ArrayList<>()).build();
+        //init surveyed
+        LoopVariable rpPrenomEnq = LoopVariable.builder().name("RPPRENOM").values(new ArrayList<>()).build();
+        LoopVariable rpAnaisEnq = LoopVariable.builder().name("RPANAISENQ").values(new ArrayList<>()).build();
 
+        // init Parents
         Map<Integer, LoopVariable> loopVariableMapFirstNameParent = new HashMap<>();
         Map<Integer, LoopVariable> loopVariableMapBirthYearParent = new HashMap<>();
         Map<Integer, LoopVariable> loopVariableMapGenderParent = new HashMap<>();
@@ -54,21 +58,17 @@ public class CensusJsonAdapter {
             loopVariableMapBirthYearParent.put(i, LoopVariable.builder().name("RPANAISPAR" + i).values(new ArrayList<>()).build());
             loopVariableMapGenderParent.put(i, LoopVariable.builder().name("RPSEXPAR" + i).values(new ArrayList<>()).build());
         }
-
+        // init Conjoint
         LoopVariable rpPrenomConj = LoopVariable.builder().name("RPPRENOMCONJ").values(new ArrayList<>()).build();
         LoopVariable rpAnaisConj = LoopVariable.builder().name("RPANAISCONJ").values(new ArrayList<>()).build();
         LoopVariable rpSexConj = LoopVariable.builder().name("RPSEXCONJ").values(new ArrayList<>()).build();
 
-        Map<Integer, LoopVariable> loopVariableMapFirstNameChildren = new HashMap<>();
-        Map<Integer, LoopVariable> loopVariableMapBirthYearChildren = new HashMap<>();
-        for (int i = 1; i <= BusinessConstant.MAX_CHILDREN_PER_PERSON; i++) {
-            loopVariableMapFirstNameChildren.put(i, LoopVariable.builder().name("RPPRENOMENF" + i).values(new ArrayList<>()).build());
-            loopVariableMapBirthYearChildren.put(i, LoopVariable.builder().name("RPANAISENF" + i).values(new ArrayList<>()).build());
-        }
 
-        String firstNameList = listOfSurveyedMajor.stream().map(IndividualFormDto::getFirstName).collect(Collectors.joining(", "));
         for (IndividualFormDto individual : listOfSurveyedMajor) {
-            rpListePrenoms.getValues().add(firstNameList);
+            // Get enqu
+            rpPrenomEnq.getValues().add(individual.getFirstName());
+            rpAnaisEnq.getValues().add(individual.getBirthYear());
+
             // Get conjoint
             IndividualFormDto conjoint = responseNetUserDto.getConjointByIndividual(individual);
             rpPrenomConj.getValues().add(conjoint.getFirstName());
@@ -83,23 +83,16 @@ public class CensusJsonAdapter {
                 loopVariableMapGenderParent.get(i).getValues().add(parents.get(i).getGender());
             }
 
-            // Get children
-            Map<Integer,IndividualFormDto> children = responseNetUserDto.getListOfChildrenByIndividual(individual);
-            for (int i = 1; i <= BusinessConstant.MAX_CHILDREN_PER_PERSON; i++) {
-                loopVariableMapFirstNameChildren.get(i).getValues().add(children.get(i).getFirstName());
-                loopVariableMapBirthYearChildren.get(i).getValues().add(children.get(i).getBirthYear());
-            }
         }
         List<LoopVariable> loopVariables = new ArrayList<>();
-        loopVariables.add(rpListePrenoms);
+        loopVariables.add(rpPrenomEnq);
+        loopVariables.add(rpAnaisEnq);
         loopVariables.add(rpPrenomConj);
         loopVariables.add(rpAnaisConj);
         loopVariables.add(rpSexConj);
         loopVariables.addAll(loopVariableMapFirstNameParent.values());
         loopVariables.addAll(loopVariableMapBirthYearParent.values());
         loopVariables.addAll(loopVariableMapGenderParent.values());
-        loopVariables.addAll(loopVariableMapFirstNameChildren.values());
-        loopVariables.addAll(loopVariableMapBirthYearChildren.values());
 
         return ExternalsVariables.builder()
                 .simpleVariables(simpleVariables)

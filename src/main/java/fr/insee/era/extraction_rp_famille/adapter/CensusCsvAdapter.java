@@ -23,20 +23,14 @@ public class CensusCsvAdapter {
         // add external line
         List<String> externalLine = new ArrayList<>();
         List<IndividualFormDto> listOfSurveyedMajor = responseNetUserDto.getListOfSurveyedMajor();
-        String firstNameList = listOfSurveyedMajor.stream()
-                .map(IndividualFormDto::getFirstName).collect(Collectors.joining(", "));
-        //rplistePrenoms
+
         for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
+
             if (i >= listOfSurveyedMajor.size()) {
+                //Surveyed
                 externalLine.add("");
-                continue;
-            }
-            externalLine.add(firstNameList);
-        }
+                externalLine.add("");
 
-        for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
-
-            if (i >= listOfSurveyedMajor.size()) {
                 //Conjoint
                 externalLine.addAll(getExternalLine(null, true, false));
 
@@ -44,14 +38,14 @@ public class CensusCsvAdapter {
                 externalLine.addAll(getExternalLine(null, true, false));
                 externalLine.addAll(getExternalLine(null, true, false));
 
-                // Children
-                for (int j = 1; j <= BusinessConstant.MAX_CHILDREN_PER_PERSON; j++) {
-                    externalLine.addAll(getExternalLine(null, false, false));
-                }
                 continue;
             }
 
             IndividualFormDto individual = listOfSurveyedMajor.get(i);
+
+            //Surveyed
+            externalLine.add(individual.getFirstName());
+            externalLine.add(StringUtils.isBlank(individual.getBirthYear()) ? "" : individual.getBirthYear());
 
             //Conjoint
             IndividualFormDto conjoint = responseNetUserDto.getConjointByIndividual(individual);
@@ -63,14 +57,9 @@ public class CensusCsvAdapter {
             externalLine.addAll(getExternalLine(parents.get(1), true, false));
             externalLine.addAll(getExternalLine(parents.get(2), true, false));
 
-            // Children
-            Map<Integer,IndividualFormDto> children = responseNetUserDto.getListOfChildrenByIndividual(individual);
-            for (int j = 1; j <= BusinessConstant.MAX_CHILDREN_PER_PERSON; j++) {
-                externalLine.addAll(getExternalLine(children.get(j), false, false));
-            }
         }
-        for (int i = 25; i < lineSize; i++) {
-            line[i] = externalLine.get(i - 25);
+        for (int i = 26; i < lineSize; i++) {
+            line[i] = externalLine.get(i - 26);
         }
         return line;
     }
@@ -122,6 +111,7 @@ public class CensusCsvAdapter {
         String firstNameList = listOfSurveyedMajor.stream()
                 .map(IndividualFormDto::getFirstName).collect(Collectors.joining(", "));
         commonLine.put(23, firstNameList);
+        commonLine.put(25, firstNameList);
         return commonLine;
     }
 
@@ -131,15 +121,15 @@ public class CensusCsvAdapter {
                 "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition"
                 , "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune",
                 "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1",
-                "whoAnswers2", "whoAnswers3"));
+                "whoAnswers2", "whoAnswers3", "RPLISTEPRENOMS"));
 
         List<String> externalsHeader = new ArrayList<>();
         //add externals headers
-        //rplistePrenoms
         for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
-            externalsHeader.add(String.format("RPLISTEPRENOMS_%d", i));
-        }
-        for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
+            //Surveyed
+            externalsHeader.add(String.format("RPPRENOM_%d", i));
+            externalsHeader.add(String.format("RPANAISENQ_%d", i));
+
             //Conjoint
             externalsHeader.addAll(getExternalsHeaderByType("CONJ", i, true, false));
 
@@ -148,11 +138,6 @@ public class CensusCsvAdapter {
 
             //parent2
             externalsHeader.addAll(getExternalsHeaderByType("PAR2", i, true, false));
-
-            //Enfants
-            for (int j = 1; j <= BusinessConstant.MAX_CHILDREN_PER_PERSON; j++) {
-                externalsHeader.addAll(getExternalsHeaderByType("ENF" + j, i, false, false));
-            }
         }
 
         return Stream.of(commonHeader, externalsHeader).flatMap(Collection::stream).toArray(String[]::new);
