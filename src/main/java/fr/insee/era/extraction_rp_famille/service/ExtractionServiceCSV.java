@@ -25,7 +25,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Slf4j @Service public class ExtractionServiceCSV {
+@Slf4j @Service
+@Deprecated
+public class ExtractionServiceCSV {
 
 
         static Pattern patternCodePostal = Pattern.compile("^\\d{5}$");

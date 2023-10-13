@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@Slf4j @Service public class ExtractionServiceJSON {
+@Slf4j @Service
+@Deprecated
+public class ExtractionServiceJSON {
 
         @Autowired OmerDAO omerDAO;
         @Autowired OdicDAO odicDAO;
