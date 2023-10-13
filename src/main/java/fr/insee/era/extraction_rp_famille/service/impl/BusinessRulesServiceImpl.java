@@ -15,17 +15,15 @@ public class BusinessRulesServiceImpl implements BusinessRulesService {
             return individuals;
         }
         // flag major
-        individuals.forEach(i -> i.setMajor(isMajor(i.getBirthYear(), i.getBirthMonth(), i.getBirthDay())));
+        individuals.forEach(i -> i.setMajor(isMajor(i.getBirthDate())));
         // flag surveyed
         individuals.forEach(i -> i.setSurveyed(gender.getValue().equals(i.getGender())));
         // remove if no major surveyed
         individuals = removeIfNoMajorSurveyed(individuals);
         // sort
         individuals = individuals.stream().sorted((i1, i2) -> {
-            LocalDate birthDate1 = LocalDate.of(Integer.parseInt(i1.getBirthYear()), Integer.parseInt(i1.getBirthMonth()),
-                    Integer.parseInt(i1.getBirthDay()));
-            LocalDate birthDate2 = LocalDate.of(Integer.parseInt(i2.getBirthYear()), Integer.parseInt(i2.getBirthMonth()),
-                    Integer.parseInt(i2.getBirthDay()));
+            LocalDate birthDate1 = i1.getBirthDate();
+            LocalDate birthDate2 = i2.getBirthDate();
             return birthDate1.compareTo(birthDate2);
         }).toList();
 
@@ -49,9 +47,10 @@ public class BusinessRulesServiceImpl implements BusinessRulesService {
         return individuals;
     }
 
-    private boolean isMajor(String birthYear, String birthMonth, String birthDay) {
-        LocalDate birthDate = LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth),
-                Integer.parseInt(birthDay));
+    private boolean isMajor(LocalDate birthDate) {
+        if (birthDate == null) {
+            return false;
+        }
         LocalDate majorityDate = birthDate.plusYears(18);
         LocalDate startYear = LocalDate.of(LocalDate.now().getYear(), 1, 1);
         return majorityDate.isBefore(startYear);

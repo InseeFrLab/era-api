@@ -3,6 +3,7 @@ package fr.insee.era.extraction_rp_famille.model.dto;
 import fr.insee.era.extraction_rp_famille.model.enums.RelationshipType;
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +31,12 @@ public class IndividualFormDto {
     }
 
     public LocalDate getBirthDate() {
+        if (StringUtils.isBlank(birthMonth)) {
+            birthMonth = "01";
+        }
+        if (StringUtils.isBlank(birthDay)) {
+            birthDay = "01";
+        }
         return LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth), Integer.parseInt(birthDay));
     }
 
