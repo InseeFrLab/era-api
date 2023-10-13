@@ -70,8 +70,8 @@ public class OdicDAO extends CommonDAO {
         return getRimByGenderCityAndPeriod(gender, startDate, endDate, jdbcTemplate);
     }
 
-    public List<IndividualFormDto> getIndividualsByResponseId(long id) {
-        return getIndividualsByResponseId(id, jdbcTemplate);
+    public Map<Long,List<IndividualFormDto>> getIndividuals(List<Long> ids) {
+        return getIndividuals(ids, jdbcTemplate);
     }
 
 }

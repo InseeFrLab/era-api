@@ -4,6 +4,7 @@ import fr.insee.era.extraction_rp_famille.configuration.ParametrageConfiguration
 import fr.insee.era.extraction_rp_famille.model.BDDSource;
 import fr.insee.era.extraction_rp_famille.model.BIEntity;
 import fr.insee.era.extraction_rp_famille.model.Constantes;
+import fr.insee.era.extraction_rp_famille.model.LogementIndividu;
 import fr.insee.era.extraction_rp_famille.model.dto.*;
 import fr.insee.era.extraction_rp_famille.model.enums.GenderType;
 import fr.insee.era.extraction_rp_famille.model.enums.RelationshipType;
@@ -26,10 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -266,7 +264,8 @@ public abstract class CommonDAO {
 
     protected List<ResponseNetUserDto> getRimByGenderCityAndPeriod(GenderType gender, LocalDate startDate,
                                                                    LocalDate endDate, JdbcTemplate jdbc) {
-        String sql = "select r.id, r.identifiant, r.idinternaute, mail, CONCAT(codedepartement, codecommune) as depcom , irisar," +
+        String sql = "select r.id, r.identifiant, r.idinternaute, mail, CONCAT(codedepartement, codecommune) as " +
+                "depcom , irisar," +
                 "numvoiloc, bisterloc, typevoiloc, nomvoiloc, resloc, cpostloc, car " +
                 "from reponseinternetmenages r, city_parameter_tmp tmp, internautes i " +
                 "where dateenvoi between ? and ? " +
@@ -278,7 +277,8 @@ public abstract class CommonDAO {
                 "order by r.id";
         var startTimeStamp = Timestamp.valueOf(startDate.atStartOfDay());
         var endTimeStamp = Timestamp.valueOf(endDate.atStartOfDay());
-        List<ResponseNetUserDto> responses = jdbc.query(sql, new Object[]{startTimeStamp, endTimeStamp, gender.getValue()},
+        List<ResponseNetUserDto> responses = jdbc.query(sql, new Object[]{startTimeStamp, endTimeStamp,
+                        gender.getValue()},
                 new int[]{Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR},
                 (rs, rowNum) -> ResponseNetUserDto.builder()
                         .id(rs.getLong("id"))
@@ -299,56 +299,101 @@ public abstract class CommonDAO {
         return responses;
     }
 
-    protected List<IndividualFormDto> getIndividualsByResponseId(long id, JdbcTemplate jdbc) {
-        String sqlWithoutTies = "select id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, cnaie, pnai, sexe " +
-                "from bulletinindividuels b where tableauabcd = 'A' and feuillelogement = ? order by b.id";
+    protected Map<Long, List<IndividualFormDto>> getIndividuals(List<Long> ids, JdbcTemplate jdbc) {
+        String sqlIndividu = "select feuillelogement, id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, cnaie, " +
+                "pnai, sexe, null as lienenregistre, null as individurelie " +
+                "from bulletinindividuels b " +
+                "where tableauabcd = 'A' and feuillelogement in (SELECT id FROM response_id_tmp) " +
+                "order by b.feuillelogement, b.id ";
 
-        String sqlWithTies = "select id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, cnaie, pnai, sexe, lienenregistre, individurelie " +
+        String sqlTies = "select feuillelogement, id, lienenregistre, individurelie " +
                 "from bulletinindividuels b left join lienindividus l on l.individu = b.id " +
-                "where tableauabcd = 'A' and feuillelogement = ? and lienenregistre in (1,2,3) " +
-                "order by b.id";
+                "where tableauabcd = 'A' and feuillelogement in (SELECT id FROM response_id_tmp) and lienenregistre " +
+                "in (1,2,3)" +
+                "order by b.feuillelogement, b.id ";
 
-        List<Map<String, Object>> individualsWithTies = jdbc.queryForList(sqlWithTies, new Object[]{id}, new int[]{Types.BIGINT});
-        List<Map<String, Object>> individualsWithoutTies = jdbc.queryForList(sqlWithoutTies, new Object[]{id}, new int[]{Types.BIGINT});
+        createTemporaryTableForResponseIds(ids, jdbc);
+        List<Map<String, Object>> individuals = jdbc.queryForList(sqlIndividu);
+        List<Map<String, Object>> ties = jdbc.queryForList(sqlTies);
 
-        List<Map<String, Object>> individuals = new ArrayList<>(individualsWithTies);
-        individualsWithoutTies.stream()
-                .filter(i ->
-                        individuals.stream().noneMatch(i2 -> (i2.get("id")).equals(i.get("id"))))
-                .forEach(individuals::add);
+        if (individuals.isEmpty()) {
+            return new HashMap<>();
+        }
 
-        List<Long> individualIds = individuals.stream().map(i -> (Long) i.get("id")).distinct().toList();
-        List<IndividualFormDto> individualFormDtos = new ArrayList<>();
-        for (Long individualId : individualIds) {
-            List<Map<String, Object>> individualRows = individuals.stream()
-                    .filter(i -> ((Long) i.get("id")).equals(individualId)).toList();
-            IndividualFormDto individualFormDto = IndividualFormDto.builder()
-                    .id(individualId)
-                    .lastName((String) individualRows.get(0).get("nom"))
-                    .firstName((String) individualRows.get(0).get("prenom"))
-                    .gender((String) individualRows.get(0).get("sexe"))
-                    .birthYear((String) individualRows.get(0).get("anai"))
-                    .birthMonth((String) individualRows.get(0).get("mnai"))
-                    .birthDay((String) individualRows.get(0).get("jnai"))
-                    .dpnaicode((String) individualRows.get(0).get("dpnaicode"))
-                    .cnaif((String) individualRows.get(0).get("cnaif"))
-                    .cnaie((String) individualRows.get(0).get("cnaie"))
-                    .pnai((String) individualRows.get(0).get("pnai"))
-                    .familyTies(new ArrayList<>())
+        Map<LogementIndividu, Map<String, Object>> resultsByLogementAndIndividu = individuals.stream()
+                .collect(Collectors.toMap(i -> new LogementIndividu((Long) i.get("feuillelogement"),
+                        (Long) i.get("id")), i -> i));
+        Map<LogementIndividu, List<RelationshipDto>> tiesByLogementAndIndividu = new HashMap<>();
+        for (Map<String, Object> oneTies : ties) {
+            LogementIndividu logementIndividu = new LogementIndividu((Long) oneTies.get("feuillelogement"), (Long) oneTies.get("id"));
+            Long idRelationship = (Long) oneTies.get("individurelie");
+            RelationshipType relationshipType = RelationshipType.fromValue((Integer) oneTies.get(
+                    "lienenregistre"));
+            RelationshipDto oneRelationship = RelationshipDto.builder()
+                    .idRelationship(idRelationship)
+                    .relationshipType(relationshipType)
                     .build();
-            for (Map<String, Object> individualRow : individualRows) {
-                Long idRelationship = (Long) individualRow.get("individurelie");
-                if (idRelationship == null) {
-                    continue;
-                }
-                RelationshipType relationshipType = RelationshipType.fromValue((Integer) individualRow.get("lienenregistre"));
-                individualFormDto.getFamilyTies().add(RelationshipDto.builder()
-                        .idRelationship(idRelationship)
-                        .relationshipType(relationshipType)
-                        .build());
+            List<RelationshipDto> relationships = tiesByLogementAndIndividu.get(logementIndividu);
+            if (relationships == null) {
+                relationships = new ArrayList<>();
+            }
+            relationships.add(oneRelationship);
+            tiesByLogementAndIndividu.put(logementIndividu, relationships);
+        }
+
+
+        Map<Long, List<IndividualFormDto>> individualsByFeuillelogementMap = new HashMap<>();
+        for (LogementIndividu logementIndividu : resultsByLogementAndIndividu.keySet()) {
+            Map<String, Object> individualForThisFeuillelogement =
+                    resultsByLogementAndIndividu.get(logementIndividu);
+            List<RelationshipDto> relationships = tiesByLogementAndIndividu.get(logementIndividu);
+            if (relationships == null) {
+                relationships = new ArrayList<>();
+            }
+            IndividualFormDto individualFormDto = mapIndividualFormDto(individualForThisFeuillelogement, relationships);
+            List<IndividualFormDto> individualFormDtos =
+                    individualsByFeuillelogementMap.get(logementIndividu.idLogement());
+            if (individualFormDtos == null) {
+                individualFormDtos = new ArrayList<>();
             }
             individualFormDtos.add(individualFormDto);
+            individualsByFeuillelogementMap.put(logementIndividu.idLogement(), individualFormDtos);
         }
-        return individualFormDtos;
+
+        jdbc.execute("Truncate response_id_tmp");
+        return individualsByFeuillelogementMap;
+    }
+
+    private IndividualFormDto mapIndividualFormDto(Map<String, Object> individualForThisFeuillelogement,
+                                                   List<RelationshipDto> ties) {
+
+        Long individualId = (Long) individualForThisFeuillelogement.get("id");
+
+        IndividualFormDto individualFormDto = IndividualFormDto.builder()
+                .id(individualId)
+                .lastName((String) individualForThisFeuillelogement.get("nom"))
+                .firstName((String) individualForThisFeuillelogement.get("prenom"))
+                .gender((String) individualForThisFeuillelogement.get("sexe"))
+                .birthYear((String) individualForThisFeuillelogement.get("anai"))
+                .birthMonth((String) individualForThisFeuillelogement.get("mnai"))
+                .birthDay((String) individualForThisFeuillelogement.get("jnai"))
+                .dpnaicode((String) individualForThisFeuillelogement.get("dpnaicode"))
+                .cnaif((String) individualForThisFeuillelogement.get("cnaif"))
+                .cnaie((String) individualForThisFeuillelogement.get("cnaie"))
+                .pnai((String) individualForThisFeuillelogement.get("pnai"))
+                .familyTies(ties)
+                .build();
+
+        return individualFormDto;
+    }
+
+    private void createTemporaryTableForResponseIds(List<Long> ids, JdbcTemplate jdbc) {
+        jdbc.execute("DROP TABLE IF EXISTS response_id_tmp");
+        jdbc.execute("CREATE TEMPORARY TABLE IF NOT EXISTS response_id_tmp (id bigint NOT NULL)");
+        List<Object[]> responseIds = new ArrayList<>();
+        for (Long id : ids) {
+            responseIds.add(new Object[]{id});
+        }
+        jdbc.batchUpdate("INSERT INTO response_id_tmp VALUES(?)", responseIds);
     }
 }

@@ -54,12 +54,11 @@ public class OmerDAO extends CommonDAO {
         createTemporaryTableForCitiesParameter(jdbcTemplate1, citiesParameterEntities);
     }
 
-
     public List<ResponseNetUserDto> getRimByGenderCityAndPeriod(GenderType gender, LocalDate startDate, LocalDate endDate) {
         return getRimByGenderCityAndPeriod(gender, startDate, endDate, jdbcTemplate1);
     }
 
-    public List<IndividualFormDto> getIndividualsByResponseId(long id) {
-        return getIndividualsByResponseId(id, jdbcTemplate1);
+    public Map<Long,List<IndividualFormDto>> getIndividuals(List<Long> ids) {
+        return getIndividuals(ids, jdbcTemplate1);
     }
 }

@@ -45,13 +45,12 @@ public class CensusExtractionServiceImpl implements CensusExtractionService {
         // Get census respondents by gender city and period
         List<ResponseNetUserDto> genderCitiesResponse = omerDao.getRimByGenderCityAndPeriod(gender, startDate, endDate);
         log.info("Number of units {} in the census from {} to {}: {}", gender.getLabel(), startDate, endDate, genderCitiesResponse.size());
-        for (ResponseNetUserDto responseNetUserDto : genderCitiesResponse) {
-            // Add individuals with family ties to response
-            responseNetUserDto.setIndividuals(individualService.getIndividualsByResponseId(responseNetUserDto.getId(), gender));
-        }
+
+        // Get individuals
+        genderCitiesResponse = individualService.getIndividuals(genderCitiesResponse, gender);
+
         // filter responses by business rules
         genderCitiesResponse = businessRulesService.filterResponseNetUser(genderCitiesResponse);
-
         return genderCitiesResponse;
     }
 }
