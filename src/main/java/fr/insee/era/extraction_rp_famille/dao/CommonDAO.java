@@ -295,7 +295,6 @@ public abstract class CommonDAO {
                         .cpostloc(rs.getString("cpostloc"))
                         .car(rs.getString("car"))
                         .build());
-        jdbc.execute("Truncate city_parameter_tmp");
         return responses;
     }
 
