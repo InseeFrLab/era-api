@@ -10,9 +10,9 @@
     </parent>
     <groupId>fr.insee</groupId>
     <artifactId>era</artifactId>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.1.0-RC</version>
     <name>ERA</name>
-    <description>API permettant de générer des JSON pour coleman</description>
+    <description>API permettant de générer des JSON pour REM</description>
     <properties>
         <java.version>17</java.version>
         <opencsv.version>5.7.1</opencsv.version>
