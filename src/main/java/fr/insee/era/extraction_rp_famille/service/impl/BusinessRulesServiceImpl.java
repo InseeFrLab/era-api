@@ -53,7 +53,7 @@ public class BusinessRulesServiceImpl implements BusinessRulesService {
         }
         LocalDate majorityDate = birthDate.plusYears(18);
         LocalDate startYear = LocalDate.of(LocalDate.now().getYear(), 1, 1);
-        return majorityDate.isBefore(startYear);
+        return !majorityDate.isAfter(startYear); // majorityDate <= startYear
     }
 
 }
