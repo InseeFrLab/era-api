@@ -34,6 +34,7 @@ import java.util.Collection;
 @Slf4j
 @RequestMapping("/extraction-survey-unit")
 @SecurityRequirement(name = "keycloak")
+@Deprecated
 public class ExtractionController {
 
         @Autowired ExtractionServiceJSON extractionServiceJSON;

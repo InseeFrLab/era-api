@@ -12,7 +12,7 @@ public class Constantes {
         public static final int ANNEE_NAISSANCE_MAJEUR = LocalDate.now().getYear()-19;
 
         public static final int NB_MAX_PERSONNES_ENQUETEES = 10;
-        public static final int NB_MAX_ENFANT_PAR_PERSONNE = 12;
+        public static final int NB_MAX_ENFANT_PAR_PERSONNE = 8;
 
         //TODO : A supprimer pour les perfs??
         public enum BI_SEXE {

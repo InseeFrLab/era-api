@@ -5,18 +5,18 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>fr.insee</groupId>
     <artifactId>era</artifactId>
-    <version>0.0.6</version>
+    <version>0.1.0</version>
     <name>ERA</name>
-    <description>API permettant de générer des JSON pour coleman</description>
+    <description>API permettant de générer des JSON pour REM</description>
     <properties>
         <java.version>17</java.version>
         <opencsv.version>5.7.1</opencsv.version>
-        <springdoc.version>2.0.0</springdoc.version>
+        <springdoc.version>2.1.0</springdoc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -107,6 +107,7 @@
 
 
     <build>
+        <finalName>era-erabo-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
