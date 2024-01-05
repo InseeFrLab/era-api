@@ -51,6 +51,8 @@ public class CensusExtractionServiceImpl implements CensusExtractionService {
 
         // filter responses by business rules
         genderCitiesResponse = businessRulesService.filterResponseNetUser(genderCitiesResponse);
+        // complete responses when missing zipcode
+        genderCitiesResponse = businessRulesService.completeResponseNetUser(genderCitiesResponse);
         return genderCitiesResponse;
     }
 }

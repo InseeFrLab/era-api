@@ -11,4 +11,6 @@ public interface BusinessRulesService {
     List<IndividualFormDto> filterIndividual(List<IndividualFormDto> individuals, GenderType gender);
 
     List<ResponseNetUserDto> filterResponseNetUser(List<ResponseNetUserDto> responses);
+
+    List<ResponseNetUserDto> completeResponseNetUser(List<ResponseNetUserDto> genderCitiesResponse);
 }
