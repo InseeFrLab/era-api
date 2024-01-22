@@ -35,7 +35,7 @@ public class IndividualFormDto {
     public LocalDate getBirthDate() {
         if (StringUtils.isBlank(birthYear) || !StringUtils.isNumeric(birthYear)) {
             log.warn("Birth year is not valid: {}", id);
-            return LocalDate.of(1900, 12, 31);
+            return LocalDate.of(2024, 01, 01);
         }
         if (StringUtils.isBlank(birthMonth) || !StringUtils.isNumeric(birthMonth)) {
             log.warn("Birth month is not valid: {}", id);
