@@ -33,16 +33,16 @@ public class IndividualFormDto {
     }
 
     public LocalDate getBirthDate() {
-        if (StringUtils.isBlank(birthYear) && !StringUtils.isNumeric(birthYear)) {
-            log.info("Birth year is not valid: {}", id);
+        if (StringUtils.isBlank(birthYear) || !StringUtils.isNumeric(birthYear)) {
+            log.warn("Birth year is not valid: {}", id);
             return LocalDate.of(1900, 12, 31);
         }
-        if (StringUtils.isBlank(birthMonth) && !StringUtils.isNumeric(birthMonth)) {
-            log.info("Birth month is not valid: {}", id);
+        if (StringUtils.isBlank(birthMonth) || !StringUtils.isNumeric(birthMonth)) {
+            log.warn("Birth month is not valid: {}", id);
             return LocalDate.of(Integer.parseInt(birthYear), 12, 31);
         }
-        if (StringUtils.isBlank(birthDay) && !StringUtils.isNumeric(birthDay)) {
-            log.info("Birth day is not valid: {}", id);
+        if (StringUtils.isBlank(birthDay) || !StringUtils.isNumeric(birthDay)) {
+            log.warn("Birth day is not valid: {}", id);
             return LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth), 31);
         }
         return LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth), Integer.parseInt(birthDay));
