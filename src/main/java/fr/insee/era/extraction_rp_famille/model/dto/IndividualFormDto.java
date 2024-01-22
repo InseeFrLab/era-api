@@ -33,10 +33,13 @@ public class IndividualFormDto {
     }
 
     public LocalDate getBirthDate() {
-        if (StringUtils.isBlank(birthMonth)) {
+        if (StringUtils.isBlank(birthYear) && !StringUtils.isNumeric(birthYear)) {
+            return LocalDate.of(1980, 12, 31);
+        }
+        if (StringUtils.isBlank(birthMonth) && !StringUtils.isNumeric(birthMonth)) {
             return LocalDate.of(Integer.parseInt(birthYear), 12, 31);
         }
-        if (StringUtils.isBlank(birthDay)) {
+        if (StringUtils.isBlank(birthDay) && !StringUtils.isNumeric(birthDay)) {
             return LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth), 31);
         }
         return LocalDate.of(Integer.parseInt(birthYear), Integer.parseInt(birthMonth), Integer.parseInt(birthDay));
