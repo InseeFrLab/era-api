@@ -20,7 +20,7 @@ public final class CsvUtils {
         try (
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 OutputStreamWriter streamWriter = new OutputStreamWriter(stream);
-                CSVWriter writer = new CSVWriter(streamWriter, ';', ICSVWriter.NO_QUOTE_CHARACTER, ICSVWriter.DEFAULT_ESCAPE_CHARACTER, ICSVWriter.DEFAULT_LINE_END)) {
+                CSVWriter writer = new CSVWriter(streamWriter, '|', ICSVWriter.NO_QUOTE_CHARACTER, ICSVWriter.DEFAULT_ESCAPE_CHARACTER, ICSVWriter.DEFAULT_LINE_END)) {
 
             writer.writeAll(sources);
 
