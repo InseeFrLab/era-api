@@ -1,6 +1,7 @@
 package fr.insee.era.extraction_rp_famille.configuration;
 
 import fr.insee.era.extraction_rp_famille.model.Constantes;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -30,6 +31,17 @@ public class ParametrageConfiguration implements InitializingBean {
         @Value("#{'${iris.hommes}'.split(',')}") private List<String> irisHommes;
 
         @Value("#{'${iris.femmes}'.split(',')}") private List<String> irisFemmes;
+
+        /**
+         * Supprime les éventuels blancs dans communes et iris
+         */
+        @PostConstruct
+        private void init() {
+                this.communesHommes = communesHommes.stream().map(s -> s.trim()).toList();
+                this.communesFemmes = communesFemmes.stream().map(s -> s.trim()).toList();
+                this.irisHommes = irisHommes.stream().map(s -> s.trim()).toList();
+                this.irisFemmes = irisFemmes.stream().map(s -> s.trim()).toList();
+        }
 
         /**
          * Détermine le sexe associé à soit un code commune  (priorité 1) soit à un iris (si pas de reconnaissance par code commune)
