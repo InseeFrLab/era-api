@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class IndividualServiceImpl implements IndividualService {
 
-    OmerDAO omerDao;
-    OdicDAO odicDao;
+    final OmerDAO omerDao;
+    final OdicDAO odicDao;
 
-    BusinessRulesService businessRulesService;
+    final BusinessRulesService businessRulesService;
 
     public IndividualServiceImpl(OmerDAO omerDao, OdicDAO odicDao) {
         this.omerDao = omerDao;

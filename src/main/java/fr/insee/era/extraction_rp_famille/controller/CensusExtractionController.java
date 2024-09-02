@@ -31,11 +31,11 @@ import java.util.List;
 @SecurityRequirement(name = "keycloak")
 public class CensusExtractionController {
 
-    CensusExtractionService censusExtractionService;
+    final CensusExtractionService censusExtractionService;
 
-    CensusJsonAdapter censusJsonAdapter;
+    final CensusJsonAdapter censusJsonAdapter;
 
-    CensusCsvAdapter censusCsvAdapter;
+    final CensusCsvAdapter censusCsvAdapter;
 
     public CensusExtractionController(CensusExtractionService censusExtractionService, CensusJsonAdapter censusJsonAdapter, CensusCsvAdapter censusCsvAdapter) {
         this.censusExtractionService = censusExtractionService;
@@ -63,8 +63,12 @@ public class CensusExtractionController {
         log.info("Get Census Respondents {} from {} to {} in csv format", gender.getLabel(), startDate, endDate);
         List<ResponseNetUserDto> censusRespondents = censusExtractionService.getCensusRespondents(startDate,endDate,gender);
         log.info("GET /census-respondents-by-period-and-gender/csv-download: Number of units {}", censusRespondents.size());
+
         List<String[]> csvList = new ArrayList<>();
-        String[] header = censusCsvAdapter.writeHeader();
+        int maxChildren = censusRespondents.stream().map(ResponseNetUserDto::maxNumberOfChildren).max(Long::compareTo).orElse(0L).intValue();
+        //int maxPerson = censusRespondents.stream().map(ResponseNetUserDto::countSurveyedAndMajor).max(Long::compareTo).orElse(0L).intValue();
+
+        String[] header = censusCsvAdapter.writeHeader(maxChildren);
         csvList.add(header);
         List<String[]> lines = censusRespondents.stream().map(r -> censusCsvAdapter.convert(idCampaign,r, gender, header.length)).toList();
         csvList.addAll(lines);
@@ -74,28 +78,4 @@ public class CensusExtractionController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.parseMediaType("text/csv")).body(new InputStreamResource(csvStream));
     }
-
-    @GetMapping(value = "/census-respondents-supplements-by-period-and-gender/csv-download")
-    @Operation(summary = "Get census respondents supplements for period by gender Male or Female in csv format")
-    public ResponseEntity<Object> downloadCensusRespondentsSupplements(@RequestParam("startDate") @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate startDate,
-                                                            @RequestParam("endDate") @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate endDate,
-                                                            @RequestParam("gender") GenderType gender) {
-        log.info("Get Census Respondents {} from {} to {} in csv format", gender.getLabel(), startDate, endDate);
-        List<ResponseNetUserDto> censusRespondents = censusExtractionService.getCensusRespondents(startDate,endDate,gender);
-        log.info("GET /census-respondents-supplements-by-period-and-gender/csv-download: Number of units {}", censusRespondents.size());
-        List<String[]> csvList = new ArrayList<>();
-        int maxPerson = censusRespondents.stream().map(ResponseNetUserDto::countSurveyedAndMajor).max(Long::compareTo).orElse(0L).intValue();
-        int maxChildren = censusRespondents.stream().map(ResponseNetUserDto::maxNumberOfChildren).max(Long::compareTo).orElse(0L).intValue();
-        String[] header = censusCsvAdapter.writeHeaderSupplements(maxPerson,maxChildren);
-        csvList.add(header);
-        List<String[]> lines = censusRespondents.stream().map(r -> censusCsvAdapter.convertSupplements(r, header.length, maxPerson,maxChildren)).toList();
-        csvList.addAll(lines);
-        ByteArrayInputStream csvStream = CsvUtils.write(csvList);
-
-        String fileName = String.format("extraction_Supplements_%S_%s_%s.csv", gender.getLabel() ,startDate ,endDate);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                .contentType(MediaType.parseMediaType("text/csv")).body(new InputStreamResource(csvStream));
-    }
-
-
 }

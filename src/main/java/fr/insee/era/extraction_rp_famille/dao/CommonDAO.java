@@ -167,9 +167,9 @@ public abstract class CommonDAO {
                         + " where tableauabcd ='A' and feuillelogement=? ";
         List<BIEntity> bIEntityList = jdbcTemplate.query(sql, new BIEntityMapper(bddSource), rimId);
 
-        List<Long> biIdList = bIEntityList.stream().map(BIEntity::getId).collect(Collectors.toList());
+        List<Long> biIdList = bIEntityList.stream().map(BIEntity::getId).toList();
         if (!biIdList.isEmpty()) {
-            String inParams = String.join(",", biIdList.stream().map(id -> "?").collect(Collectors.toList()));
+            String inParams = String.join(",", biIdList.stream().map(id -> "?").toList());
 
             String sqlLien =
                     String.format("SELECT individu, lienenregistre, individurelie " + " FROM lienindividus " + " " +
@@ -300,7 +300,8 @@ public abstract class CommonDAO {
 
     protected Map<Long, List<IndividualFormDto>> getIndividuals(List<Long> ids, JdbcTemplate jdbc) {
         String sqlIndividu = "select feuillelogement, id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, cnaie, " +
-                "pnai, sexe, null as lienenregistre, null as individurelie " +
+                "pnai, sexe, " +
+                "'nai_p1' as nai_p1, 'pnai_p1' as pnai_p1, 'nai_p2' as nai_p2, 'pnai_p2' as pnai_p2, null as lienenregistre, null as individurelie " +
                 "from bulletinindividuels b " +
                 "where tableauabcd = 'A' and feuillelogement in (SELECT id FROM response_id_tmp) " +
                 "order by b.feuillelogement, b.id ";
@@ -368,7 +369,7 @@ public abstract class CommonDAO {
 
         Long individualId = (Long) individualForThisFeuillelogement.get("id");
 
-        IndividualFormDto individualFormDto = IndividualFormDto.builder()
+        return IndividualFormDto.builder()
                 .id(individualId)
                 .lastName((String) individualForThisFeuillelogement.get("nom"))
                 .firstName((String) individualForThisFeuillelogement.get("prenom"))
@@ -380,10 +381,12 @@ public abstract class CommonDAO {
                 .cnaif((String) individualForThisFeuillelogement.get("cnaif"))
                 .cnaie((String) individualForThisFeuillelogement.get("cnaie"))
                 .pnai((String) individualForThisFeuillelogement.get("pnai"))
+                .naiP1((String) individualForThisFeuillelogement.get("nai_p1"))
+                .paysNaiP1((String) individualForThisFeuillelogement.get("pnai_p1"))
+                .naiP2((String) individualForThisFeuillelogement.get("nai_p2"))
+                .paysNaiP2((String) individualForThisFeuillelogement.get("pnai_p2"))
                 .familyTies(ties)
                 .build();
-
-        return individualFormDto;
     }
 
     private void createTemporaryTableForResponseIds(List<Long> ids, JdbcTemplate jdbc) {

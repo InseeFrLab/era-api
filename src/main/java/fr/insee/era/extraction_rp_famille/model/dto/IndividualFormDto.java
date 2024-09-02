@@ -24,6 +24,12 @@ public class IndividualFormDto {
     private String cnaif;
     private String cnaie;
     private String pnai;
+
+    private String naiP1;
+    private String paysNaiP1;
+    private String naiP2;
+    private String paysNaiP2;
+
     private boolean surveyed;
     private boolean major;
     private List<RelationshipDto> familyTies;
@@ -35,7 +41,7 @@ public class IndividualFormDto {
     public LocalDate getBirthDate() {
         if (StringUtils.isBlank(birthYear) || !StringUtils.isNumeric(birthYear)) {
             log.warn("Birth year is not valid: {}", id);
-            return LocalDate.of(2024, 01, 01);
+            return LocalDate.of(2024, 1, 1);
         }
         if (StringUtils.isBlank(birthMonth) || !StringUtils.isNumeric(birthMonth)) {
             log.warn("Birth month is not valid: {}", id);

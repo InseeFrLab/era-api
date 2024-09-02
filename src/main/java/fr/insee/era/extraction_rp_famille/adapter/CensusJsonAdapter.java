@@ -48,6 +48,11 @@ public class CensusJsonAdapter {
         //init surveyed
         LoopVariable rpPrenomEnq = LoopVariable.builder().name("RPPRENOM").values(new ArrayList<>()).build();
         LoopVariable rpAnaisEnq = LoopVariable.builder().name("RPANAISENQ").values(new ArrayList<>()).build();
+        LoopVariable rpNaip1Enq = LoopVariable.builder().name("RPNAIPAR1").values(new ArrayList<>()).build();
+        LoopVariable rpPNaisP1Enq = LoopVariable.builder().name("RPPNAIPAR1").values(new ArrayList<>()).build();
+        LoopVariable rpNaip2Enq = LoopVariable.builder().name("RPNAIPAR2").values(new ArrayList<>()).build();
+        LoopVariable rpPNaisP2Enq = LoopVariable.builder().name("RPPNAIPAR2").values(new ArrayList<>()).build();
+
 
         // init Parents
         Map<Integer, LoopVariable> loopVariableMapFirstNameParent = new HashMap<>();
@@ -68,6 +73,10 @@ public class CensusJsonAdapter {
             // Get enqu
             rpPrenomEnq.getValues().add(individual.getFirstName());
             rpAnaisEnq.getValues().add(individual.getBirthYear());
+            rpNaip1Enq.getValues().add(individual.getNaiP1());
+            rpPNaisP1Enq.getValues().add(individual.getPaysNaiP1());
+            rpNaip2Enq.getValues().add(individual.getNaiP2());
+            rpPNaisP2Enq.getValues().add(individual.getPaysNaiP2());
 
             // Get conjoint
             IndividualFormDto conjoint = responseNetUserDto.getConjointByIndividual(individual);
@@ -87,6 +96,11 @@ public class CensusJsonAdapter {
         List<LoopVariable> loopVariables = new ArrayList<>();
         loopVariables.add(rpPrenomEnq);
         loopVariables.add(rpAnaisEnq);
+        loopVariables.add(rpNaip1Enq);
+        loopVariables.add(rpPNaisP1Enq);
+        loopVariables.add(rpNaip2Enq);
+        loopVariables.add(rpPNaisP2Enq);
+
         loopVariables.add(rpPrenomConj);
         loopVariables.add(rpAnaisConj);
         loopVariables.add(rpSexConj);

@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 public class Constantes {
 
-        public static final Long LIEN_CONJOINT = 1l;
-        public static final Long LIEN_PARENT = 2l;
-        public static final Long LIEN_ENFANT = 3l;
+        public static final Long LIEN_CONJOINT = 1L;
+        public static final Long LIEN_PARENT = 2L;
+        public static final Long LIEN_ENFANT = 3L;
         //TODO : En fait le métier voudrait aussi garder les jeunes nés le 1er janvier de l'année suivante
         //ex: pour l'enquête 2023 ils voudraient tous les gens nés jusqu'au 1er janvier 2005 inclus
         public static final int ANNEE_NAISSANCE_MAJEUR = LocalDate.now().getYear()-19;

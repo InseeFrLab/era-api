@@ -9,6 +9,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -45,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(csrf -> csrf.disable()) //NOSONAR
+        http.csrf(AbstractHttpConfigurer::disable) //NOSONAR
                 .authorizeHttpRequests(authorize ->
                         authorize.requestMatchers(whiteList).permitAll()
                                 .requestMatchers("/extraction-survey-unit/**").hasRole(administrateurRPRole)
@@ -65,7 +66,7 @@ public class SecurityConfig {
     }
 
     Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter() {
-        return new Converter<Jwt, Collection<GrantedAuthority>>() {
+        return new Converter<>() {
             @Override
             @SuppressWarnings({"unchecked"})
             public Collection<GrantedAuthority> convert(Jwt source) {

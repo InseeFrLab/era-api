@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public class CityParameterServiceImpl implements CityParameterService {
 
-    ParametrageConfiguration parametrageConfiguration;
+    final ParametrageConfiguration parametrageConfiguration;
     public CityParameterServiceImpl(ParametrageConfiguration parametrageConfiguration) {
         this.parametrageConfiguration = parametrageConfiguration;
     }

@@ -19,12 +19,12 @@ import java.util.List;
 @Slf4j
 @Service
 public class CensusExtractionServiceImpl implements CensusExtractionService {
-    ParametrageConfiguration parametrageConfiguration;
-    CityParameterService cityParameterService;
-    BusinessRulesService businessRulesService;
-    IndividualService individualService;
-    OmerDAO omerDao;
-    OdicDAO odicDao;
+    final ParametrageConfiguration parametrageConfiguration;
+    final CityParameterService cityParameterService;
+    final BusinessRulesService businessRulesService;
+    final IndividualService individualService;
+    final OmerDAO omerDao;
+    final OdicDAO odicDao;
     public CensusExtractionServiceImpl(ParametrageConfiguration parametrageConfiguration, OmerDAO omerDao, OdicDAO odicDAO) {
         this.parametrageConfiguration = parametrageConfiguration;
         this.cityParameterService = new CityParameterServiceImpl(parametrageConfiguration);

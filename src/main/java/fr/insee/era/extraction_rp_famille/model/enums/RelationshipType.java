@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum RelationshipType {
     ENQUETE(0, "ENQ"), CONJOINT(1, "CONJ"),PARENT(2, "PAR"),ENFANT(3, "ENF");
 
-    private int value;
-    private String label;
+    private final int value;
+    private final String label;
 
     RelationshipType(int value, String label) {
         this.value = value;

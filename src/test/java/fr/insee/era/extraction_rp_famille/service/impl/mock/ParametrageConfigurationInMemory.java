@@ -2,7 +2,6 @@ package fr.insee.era.extraction_rp_famille.service.impl.mock;
 
 import fr.insee.era.extraction_rp_famille.configuration.ParametrageConfiguration;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.List;

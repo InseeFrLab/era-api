@@ -4,7 +4,6 @@ import fr.insee.era.extraction_rp_famille.model.BusinessConstant;
 import fr.insee.era.extraction_rp_famille.model.dto.IndividualFormDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ResponseNetUserDto;
 import fr.insee.era.extraction_rp_famille.model.enums.GenderType;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,29 +13,70 @@ import java.util.stream.Stream;
 @Service
 public class CensusCsvAdapter {
 
-    public String[] convert(String idCampaign, ResponseNetUserDto responseNetUserDto, GenderType gender, int lineSize) {
-        String[] line = new String[lineSize];
+    private static final String EMPTY_STRING = "";
 
-        // add common line
-        Map<Integer, String> commonLine = getCommonLine(idCampaign, responseNetUserDto, gender);
-        commonLine.forEach((key, value) -> line[key] = value);
-        // add external line
-        List<String> externalLine = new ArrayList<>();
+    /**
+     * Parse a response to generate a CSV line
+     *
+     * @param idCampaign         : one of the columns of the CSV is this value
+     * @param responseNetUserDto : The reponse to parse
+     * @param gender
+     * @param lineSize           : number of columns
+     * @return a String array representing the columns of a CSV line
+     */
+    public String[] convert(String idCampaign, ResponseNetUserDto responseNetUserDto, GenderType gender, int lineSize) {
+        List<String> line = new ArrayList<>(lineSize);
+
         List<IndividualFormDto> listOfSurveyedMajor = responseNetUserDto.getListOfSurveyedMajor();
 
+        line.add(String.valueOf(responseNetUserDto.getId()));
+        line.add(idCampaign);
+        line.add(responseNetUserDto.getIdentifiant());
+        line.add(gender.getValue()); //Lot == gender
+        line.add(EMPTY_STRING); //civilite
+        line.add(EMPTY_STRING);//Nom
+        line.add(EMPTY_STRING); //Prenom
+        line.add(responseNetUserDto.getMail());
+        line.add(responseNetUserDto.getNumvoiloc());
+        line.add(responseNetUserDto.getBisterloc());
+        line.add(responseNetUserDto.getTypevoiloc());
+        line.add(responseNetUserDto.getNomvoiloc());
+        line.add(responseNetUserDto.getResloc());
+        line.add(EMPTY_STRING); //Mention spéciale
+        line.add(responseNetUserDto.getCpostloc());
+        line.add(responseNetUserDto.getCar());
+        line.add(EMPTY_STRING);//NomUe
+        line.add(EMPTY_STRING);//PrenomUe
+        line.add(EMPTY_STRING);//AnneeNaissanceUe
+        line.add(gender.getValue());//TYPE_QUEST
+        line.add(gender.getLabel());//RPTYPEQUEST
+        line.add(String.valueOf(responseNetUserDto.countSurveyedAndMajor())); //RPNBQUEST
+
+        String whoAnswers = gender == GenderType.MALE ? "homme âgé" : "femme âgée";
+        line.add(String.format("Dans votre foyer, chaque %s de 18 ans ou plus doit répondre : ", whoAnswers)); //whoAnswers1
+
+        String firstNameList = listOfSurveyedMajor.stream().map(IndividualFormDto::getFirstName).collect(Collectors.joining(", "));
+        line.add(firstNameList);//whoAnswers2
+
+        line.add(EMPTY_STRING); //whoAnswers3
+        line.add(firstNameList);//RPLISTEPRENOMS
+
+        // add external line
+        //TODO : on est sur max surveyd_persons ou int maxPerson = censusRespondents.stream().map(ResponseNetUserDto::countSurveyedAndMajor).max(Long::compareTo).orElse(0L).intValue();
         for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
 
+            //Une fois qu'on a traité tous les majeurs surveyed, on mets les valeurs par défaut d'un individus null
             if (i >= listOfSurveyedMajor.size()) {
                 //Surveyed
-                externalLine.add("");
-                externalLine.add("");
+                line.add(EMPTY_STRING); //firstname
+                line.add(EMPTY_STRING); //birth year
 
                 //Conjoint
-                externalLine.addAll(getExternalLine(null, true, false));
+                getExternalLine(null).forEach(line::add);
 
                 //parents
-                externalLine.addAll(getExternalLine(null, true, false));
-                externalLine.addAll(getExternalLine(null, true, false));
+                getExternalLine(null).forEach(line::add);
+                getExternalLine(null).forEach(line::add);
 
                 continue;
             }
@@ -44,212 +84,95 @@ public class CensusCsvAdapter {
             IndividualFormDto individual = listOfSurveyedMajor.get(i);
 
             //Surveyed
-            externalLine.add(individual.getFirstName());
-            externalLine.add(StringUtils.isBlank(individual.getBirthYear()) ? "" : individual.getBirthYear());
+            getExternalLine(individual).forEach(line::add);
 
             //Conjoint
             IndividualFormDto conjoint = responseNetUserDto.getConjointByIndividual(individual);
-            externalLine.addAll(getExternalLine(conjoint, true, false));
+            getExternalLine(conjoint).forEach(line::add);
 
             //parents
-
-            Map<Integer,IndividualFormDto> parents = responseNetUserDto.getListOfParentsByIndividual(individual);
-            externalLine.addAll(getExternalLine(parents.get(1), true, false));
-            externalLine.addAll(getExternalLine(parents.get(2), true, false));
-
+            Map<Integer, IndividualFormDto> parents = responseNetUserDto.getListOfParentsByIndividual(individual);
+            getExternalLine(parents.get(1)).forEach(line::add);
+            getExternalLine(parents.get(2)).forEach(line::add);
         }
-        for (int i = 26; i < lineSize; i++) {
-            line[i] = externalLine.get(i - 26);
-        }
-        return line;
+
+        return line.toArray(new String[0]);
     }
 
-    private List<String> getExternalLine(IndividualFormDto individual, boolean withGender, boolean withSupplements) {
+    private List<String> getExternalLine(IndividualFormDto individual) {
 
         List<String> externalLine = new ArrayList<>();
         if (individual == null) {
             individual = IndividualFormDto.builder().build();
         }
-        String id = individual.getId() == 0 ? "" : String.valueOf(individual.getId());
-        externalLine = addToListWithCondition(externalLine, id, withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getFirstName(), true);
-        externalLine = addToListWithCondition(externalLine, individual.getLastName(), withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getBirthYear(), true);
-        externalLine = addToListWithCondition(externalLine, individual.getBirthMonth(), withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getBirthDay(), withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getGender(), withGender);
-        externalLine = addToListWithCondition(externalLine, individual.getDpnaicode(), withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getCnaif(), withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getCnaie(), withSupplements);
-        externalLine = addToListWithCondition(externalLine, individual.getPnai(), withSupplements);
+        String id = individual.getId() == 0 ? EMPTY_STRING : String.valueOf(individual.getId());
+        externalLine.add(id);
+        externalLine.add(individual.getFirstName());
+        externalLine.add(individual.getLastName());
+        externalLine.add(individual.getBirthYear());
+        externalLine.add(individual.getBirthMonth());
+        externalLine.add(individual.getBirthDay());
+        externalLine.add(individual.getGender());
+        externalLine.add(individual.getDpnaicode());
+        externalLine.add(individual.getCnaif());
+        externalLine.add(individual.getCnaie());
+        externalLine.add(individual.getPnai());
+
+        externalLine.add(individual.getNaiP1());//RPNAIPAR1
+        externalLine.add(individual.getPaysNaiP1());//RPPNAIPAR1
+        externalLine.add(individual.getNaiP2());//RPNAIPAR2
+        externalLine.add(individual.getPaysNaiP2());//RPPNAIPAR2
+
         return externalLine;
     }
 
 
-    private Map<Integer, String> getCommonLine(String idCampaign, ResponseNetUserDto responseNetUserDto,
-                                               GenderType gender) {
-        Map<Integer, String> commonLine = new HashMap<>();
-        commonLine.put(0, String.valueOf(responseNetUserDto.getId()));
-        commonLine.put(1, idCampaign);
-        commonLine.put(2, responseNetUserDto.getIdentifiant());
-        commonLine.put(3, gender.getValue());
-        commonLine.put(7, responseNetUserDto.getMail());
-        commonLine.put(8, responseNetUserDto.getNumvoiloc());
-        commonLine.put(9, responseNetUserDto.getBisterloc());
-        commonLine.put(10, responseNetUserDto.getTypevoiloc());
-        commonLine.put(11, responseNetUserDto.getNomvoiloc());
-        commonLine.put(12, responseNetUserDto.getResloc());
-        commonLine.put(14, responseNetUserDto.getCpostloc());
-        commonLine.put(15, responseNetUserDto.getCar());
-        commonLine.put(19, gender.getValue());
-        commonLine.put(20, gender.getLabel());
-        commonLine.put(21, String.valueOf(responseNetUserDto.countSurveyedAndMajor()));
-        String whoAnswers = gender == GenderType.MALE ? "homme âgé" : "femme âgée";
-        commonLine.put(22, String.format("Dans votre foyer, chaque %s de 18 ans ou plus doit répondre : ",
-                whoAnswers));
-        List<IndividualFormDto> listOfSurveyedMajor = responseNetUserDto.getListOfSurveyedMajor();
-        String firstNameList = listOfSurveyedMajor.stream()
-                .map(IndividualFormDto::getFirstName).collect(Collectors.joining(", "));
-        commonLine.put(23, firstNameList);
-        commonLine.put(25, firstNameList);
-        return commonLine;
-    }
+    public String[] writeHeader(int maxChildren) {
 
-    public String[] writeHeader() {
-
-        List<String> commonHeader = new ArrayList<>(Arrays.asList("IdentifiantExterne", "IdModele", "IdeC", "IdLot",
-                "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition"
-                , "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune",
-                "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1",
-                "whoAnswers2", "whoAnswers3", "RPLISTEPRENOMS"));
+        List<String> commonHeader = new ArrayList<>(Arrays.asList("IdentifiantExterne", "IdModele", "IdeC", "IdLot", "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1", "whoAnswers2", "whoAnswers3", "RPLISTEPRENOMS"));
 
         List<String> externalsHeader = new ArrayList<>();
         //add externals headers
         for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
             //Surveyed
-            externalsHeader.add(String.format("RPPRENOM_%d", i));
-            externalsHeader.add(String.format("RPANAISENQ_%d", i));
+            externalsHeader.addAll(getExternalsHeaderByType("ENQ", i));
 
             //Conjoint
-            externalsHeader.addAll(getExternalsHeaderByType("CONJ", i, true, false));
+            externalsHeader.addAll(getExternalsHeaderByType("CONJ", i));
 
             //parent1
-            externalsHeader.addAll(getExternalsHeaderByType("PAR1", i, true, false));
+            externalsHeader.addAll(getExternalsHeaderByType("PAR1", i));
 
             //parent2
-            externalsHeader.addAll(getExternalsHeaderByType("PAR2", i, true, false));
+            externalsHeader.addAll(getExternalsHeaderByType("PAR2", i));
+
+            //Enfants
+            for (int j = 1; j <= maxChildren; j++) {
+                externalsHeader.addAll(getExternalsHeaderByType("ENF" + j, i));
+            }
         }
 
         return Stream.of(commonHeader, externalsHeader).flatMap(Collection::stream).toArray(String[]::new);
     }
 
-    private List<String> getExternalsHeaderByType(String type, int index, boolean withGender, boolean withSupplements) {
+    private List<String> getExternalsHeaderByType(String type, int index) {
         List<String> externalsHeader = new ArrayList<>();
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPID%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPPRENOM%s_%d", type, index), true);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPNOM%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPANAIS%s_%d", type, index), true);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPMNAIS%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPJNAIS%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPSEX%s_%d", type, index), withGender);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPDPNAICODE%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPCNAIF%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPCNAIE%s_%d", type, index), withSupplements);
-        externalsHeader = addToListWithCondition(externalsHeader, String.format("RPPNAI%s_%d", type, index), withSupplements);
+        externalsHeader.add(String.format("RPID%s_%d", type, index));
+        externalsHeader.add(String.format("RPPRENOM%s_%d", type, index));
+        externalsHeader.add(String.format("RPNOM%s_%d", type, index));
+        externalsHeader.add(String.format("RPANAIS%s_%d", type, index));
+        externalsHeader.add(String.format("RPMNAIS%s_%d", type, index));
+        externalsHeader.add(String.format("RPJNAIS%s_%d", type, index));
+        externalsHeader.add(String.format("RPSEX%s_%d", type, index));
+        externalsHeader.add(String.format("RPDPNAICODE%s_%d", type, index));
+        externalsHeader.add(String.format("RPCNAIF%s_%d", type, index));
+        externalsHeader.add(String.format("RPCNAIE%s_%d", type, index));
+        externalsHeader.add(String.format("RPPNAI%s_%d", type, index));
+        externalsHeader.add(String.format("RPNAIPAR1%s_%d", type, index));
+        externalsHeader.add(String.format("RPPNAIPAR1%s_%d", type, index));
+        externalsHeader.add(String.format("RPNAIPAR2%s_%d", type, index));
+        externalsHeader.add(String.format("RPPNAIPAR2%s_%d", type, index));
         return externalsHeader;
     }
 
-    private List<String> addToListWithCondition(List<String> list, String value, boolean condition) {
-        if (StringUtils.isBlank(value)) {
-            value = "";
-        }
-        if (condition) {
-            list.add(value);
-        }
-        return list;
-    }
-
-
-
-    public String[] convertSupplements(ResponseNetUserDto responseNetUserDto, int lineSize,
-                                       int maxPerson, int maxChildren) {
-        String[] line = new String[lineSize];
-
-        // add id rim
-        line[0] =String.valueOf(responseNetUserDto.getId());
-
-        // add supplements
-        List<String> supplementsLine = new ArrayList<>();
-        List<IndividualFormDto> listOfSurveyedMajor = responseNetUserDto.getListOfSurveyedMajor();
-
-        for (int i = 0; i < maxPerson; i++) {
-            if (i >= listOfSurveyedMajor.size()) {
-                //Surveyed
-                supplementsLine.addAll(getExternalLine(null, true, true));
-
-                //Conjoint
-                supplementsLine.addAll(getExternalLine(null, true, true));
-
-                //parents
-                supplementsLine.addAll(getExternalLine(null, true, true));
-                supplementsLine.addAll(getExternalLine(null, true, true));
-
-                // Children
-                for (int j = 1; j <= maxChildren; j++) {
-                    supplementsLine.addAll(getExternalLine(null, true, true));
-                }
-                continue;
-            }
-            IndividualFormDto individual = listOfSurveyedMajor.get(i);
-
-            //Surveyed
-            supplementsLine.addAll(getExternalLine(individual, true, true));
-
-            //Conjoint
-            IndividualFormDto conjoint = responseNetUserDto.getConjointByIndividual(individual);
-            supplementsLine.addAll(getExternalLine(conjoint, true, true));
-
-            //parents
-
-            Map<Integer,IndividualFormDto> parents = responseNetUserDto.getListOfParentsByIndividual(individual);
-            supplementsLine.addAll(getExternalLine(parents.get(1), true, true));
-            supplementsLine.addAll(getExternalLine(parents.get(2), true, true));
-
-            // Children
-            Map<Integer,IndividualFormDto> children = responseNetUserDto.getListOfChildrenByIndividual(individual);
-            for (int j = 1; j <= maxChildren; j++) {
-                supplementsLine.addAll(getExternalLine(children.get(j), true, true));
-            }
-        }
-        for (int i = 1; i < lineSize; i++) {
-            line[i] = supplementsLine.get(i-1);
-        }
-        return line;
-    }
-
-    public String[] writeHeaderSupplements(int maxPerson, int maxChildren) {
-
-        List<String> headers = new ArrayList<>();
-        headers.add("IdentifiantExterne");
-        for (int i = 0; i < maxPerson; i++) {
-            //Surveyed
-            headers.addAll(getExternalsHeaderByType("ENQ", i, true, true));
-
-            //Conjoint
-            headers.addAll(getExternalsHeaderByType("CONJ", i, true, true));
-
-            //parent1
-            headers.addAll(getExternalsHeaderByType("PAR1", i, true, true));
-
-            //parent2
-            headers.addAll(getExternalsHeaderByType("PAR2", i, true, true));
-
-            //Enfants
-            for (int j = 1; j <= maxChildren; j++) {
-                headers.addAll(getExternalsHeaderByType("ENF" + j, i, true, true));
-            }
-        }
-
-        return headers.toArray(String[]::new);
-    }
 }
