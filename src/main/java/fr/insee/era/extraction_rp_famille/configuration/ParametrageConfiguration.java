@@ -18,9 +18,6 @@ import java.util.Map;
 
 public class ParametrageConfiguration implements InitializingBean {
 
-        private static Map<String, Constantes.BI_SEXE> communesSansIRIS;
-        private static Map<Pair<String, String>, Constantes.BI_SEXE> communesAvecIris;
-
         @Value("#{'${communes.hommes}'.split(',')}") private List<String> communesHommes;
 
         @Value("#{'${communes.femmes}'.split(',')}") private List<String> communesFemmes;
