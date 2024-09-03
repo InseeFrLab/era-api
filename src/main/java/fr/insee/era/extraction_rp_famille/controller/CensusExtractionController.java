@@ -2,6 +2,7 @@ package fr.insee.era.extraction_rp_famille.controller;
 
 import fr.insee.era.extraction_rp_famille.adapter.CensusCsvAdapter;
 import fr.insee.era.extraction_rp_famille.adapter.CensusJsonAdapter;
+import fr.insee.era.extraction_rp_famille.model.BusinessConstant;
 import fr.insee.era.extraction_rp_famille.model.dto.CensusSurveyUnitDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ResponseNetUserDto;
 import fr.insee.era.extraction_rp_famille.model.enums.GenderType;
@@ -65,10 +66,10 @@ public class CensusExtractionController {
         log.info("GET /census-respondents-by-period-and-gender/csv-download: Number of units {}", censusRespondents.size());
 
         List<String[]> csvList = new ArrayList<>();
-        int maxChildren = censusRespondents.stream().map(ResponseNetUserDto::maxNumberOfChildren).max(Long::compareTo).orElse(0L).intValue();
+        //int maxChildren = censusRespondents.stream().map(ResponseNetUserDto::maxNumberOfChildren).max(Long::compareTo).orElse(0L).intValue();
         //int maxPerson = censusRespondents.stream().map(ResponseNetUserDto::countSurveyedAndMajor).max(Long::compareTo).orElse(0L).intValue();
 
-        String[] header = censusCsvAdapter.writeHeader(maxChildren);
+        String[] header = censusCsvAdapter.writeHeader(BusinessConstant.MAX_SURVEYED_PERSONS,BusinessConstant.MAX_CHILDREN_PER_PERSON);
         csvList.add(header);
         List<String[]> lines = censusRespondents.stream().map(r -> censusCsvAdapter.convert(idCampaign,r, gender, header.length)).toList();
         csvList.addAll(lines);

@@ -128,13 +128,13 @@ public class CensusCsvAdapter {
     }
 
 
-    public String[] writeHeader(int maxChildren) {
+    public String[] writeHeader(int maxSurveydPersons, int maxChildrenPerPerson) {
 
         List<String> commonHeader = new ArrayList<>(Arrays.asList("IdentifiantExterne", "IdModele", "IdeC", "IdLot", "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1", "whoAnswers2", "whoAnswers3", "RPLISTEPRENOMS"));
 
         List<String> externalsHeader = new ArrayList<>();
         //add externals headers
-        for (int i = 0; i < BusinessConstant.MAX_SURVEYED_PERSONS; i++) {
+        for (int i = 0; i < maxSurveydPersons; i++) {
             //Surveyed
             externalsHeader.addAll(getExternalsHeaderByType("ENQ", i));
 
@@ -148,7 +148,7 @@ public class CensusCsvAdapter {
             externalsHeader.addAll(getExternalsHeaderByType("PAR2", i));
 
             //Enfants
-            for (int j = 1; j <= maxChildren; j++) {
+            for (int j = 1; j <= maxChildrenPerPerson; j++) {
                 externalsHeader.addAll(getExternalsHeaderByType("ENF" + j, i));
             }
         }
