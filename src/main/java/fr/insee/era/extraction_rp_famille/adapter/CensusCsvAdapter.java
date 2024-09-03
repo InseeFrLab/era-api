@@ -4,6 +4,7 @@ import fr.insee.era.extraction_rp_famille.model.BusinessConstant;
 import fr.insee.era.extraction_rp_famille.model.dto.IndividualFormDto;
 import fr.insee.era.extraction_rp_famille.model.dto.ResponseNetUserDto;
 import fr.insee.era.extraction_rp_famille.model.enums.GenderType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -110,8 +111,8 @@ public class CensusCsvAdapter {
         externalLine.add(individual.getFirstName());
         externalLine.add(individual.getLastName());
         externalLine.add(individual.getBirthYear());
-        externalLine.add(individual.getBirthMonth());
-        externalLine.add(individual.getBirthDay());
+        externalLine.add(StringUtils.leftPad(individual.getBirthMonth(),2,'0'));
+        externalLine.add(StringUtils.leftPad(individual.getBirthDay(),2,'0'));
         externalLine.add(individual.getGender());
         externalLine.add(individual.getDpnaicode());
         externalLine.add(individual.getCnaif());

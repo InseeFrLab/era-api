@@ -2,6 +2,7 @@ package fr.insee.era.extraction_rp_famille.adapter;
 
 import fr.insee.era.extraction_rp_famille.model.dto.*;
 import fr.insee.era.extraction_rp_famille.model.enums.GenderType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class CensusJsonAdapter {
         //init surveyed
         LoopVariable rpPrenomEnq = LoopVariable.builder().name("RPPRENOM").values(new ArrayList<>()).build();
         LoopVariable rpAnaisEnq = LoopVariable.builder().name("RPANAISENQ").values(new ArrayList<>()).build();
+        LoopVariable rpMnaisEnq = LoopVariable.builder().name("RPMNAISENQ").values(new ArrayList<>()).build();
+        LoopVariable rpJnaisEnq = LoopVariable.builder().name("RPJNAISENQ").values(new ArrayList<>()).build();
+
         LoopVariable rpNaip1Enq = LoopVariable.builder().name("RPNAIPAR1").values(new ArrayList<>()).build();
         LoopVariable rpPNaisP1Enq = LoopVariable.builder().name("RPPNAIPAR1").values(new ArrayList<>()).build();
         LoopVariable rpNaip2Enq = LoopVariable.builder().name("RPNAIPAR2").values(new ArrayList<>()).build();
@@ -73,6 +77,8 @@ public class CensusJsonAdapter {
             // Get enqu
             rpPrenomEnq.getValues().add(individual.getFirstName());
             rpAnaisEnq.getValues().add(individual.getBirthYear());
+            rpMnaisEnq.getValues().add(StringUtils.leftPad(individual.getBirthMonth(),2,'0'));
+            rpJnaisEnq.getValues().add(StringUtils.leftPad(individual.getBirthDay(),2,'0'));
             rpNaip1Enq.getValues().add(individual.getNaiP1());
             rpPNaisP1Enq.getValues().add(individual.getPaysNaiP1());
             rpNaip2Enq.getValues().add(individual.getNaiP2());
@@ -96,6 +102,9 @@ public class CensusJsonAdapter {
         List<LoopVariable> loopVariables = new ArrayList<>();
         loopVariables.add(rpPrenomEnq);
         loopVariables.add(rpAnaisEnq);
+        loopVariables.add(rpMnaisEnq);
+        loopVariables.add(rpJnaisEnq);
+
         loopVariables.add(rpNaip1Enq);
         loopVariables.add(rpPNaisP1Enq);
         loopVariables.add(rpNaip2Enq);
