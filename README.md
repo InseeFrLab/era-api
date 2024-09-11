@@ -35,203 +35,24 @@ and 000x is the iris code
 ### REST API
 ### Request
 
-`GET /extraction-survey-unit/survey-units-for-period`
+`GET /census-extraction-controller/census-respondents-by-period-and-gender`
 params : 
-- startDate
-- endDate
+- startDate : yyyy-mm-dd
+- endDate : yyyy-mm-dd
+- gender : MALE/FEMALE
 
-### Response
-
-    [
-        {
-            id	integer($int64)
-            internaute  string
-            mail        string
-            sexe        string
-        }
-    ]
-
-- id : ID réponse internet ménage
-- internaute : internet identifier
-- mail        : The mail of the survey unit
-- sexe  : The sexe of the Survey unit 1 for male ; 2 for female 
+JSON Extraction
 
 ### Request
 
-`GET /extraction-survey-unit/{id}`
+`/census-extraction/census-respondents-by-period-and-gender/csv-download`
 params :
-- id : the ID of the survey unit (RIM)
-- idCampaign : an identifier of the campaign (used by colleman)
+- startDate : yyyy-mm-dd
+- endDate : yyyy-mm-dd
+- gender : MALE/FEMALE
 
-### Response
+CSV Extraction
 
-A json with 2 parts : 
-Questionnaire and Pilotage
-Designed to be sent to colleman
-
-    {
-    "questionnaire": {
-    "id": <id>,
-    "data": {
-        "EXTERNAL": {
-            "RPNBQUEST": 1,
-            "RPTYPEQUEST": "femmes",
-            "MailReferent": "toto@gmail.com",
-            "RPLISTEPRENOMS": [
-            "XXXX"
-            ],
-            "RPPRENOMENF1": [
-            null
-            ],
-            "RPSEXENF1": [
-            null
-            ],
-            "RPANAISENF1": [
-            null
-            ],
-            "RPPRENOMENF2": [
-            null
-            ],
-            "RPSEXENF2": [
-            null
-            ],
-            "RPANAISENF2": [
-            null
-            ],
-            "RPPRENOMENF3": [
-            null
-            ],
-            "RPSEXENF3": [
-            null
-            ],
-            "RPANAISENF3": [
-            null
-            ],
-            "RPPRENOMENF4": [
-            null
-            ],
-            "RPSEXENF4": [
-            null
-            ],
-            "RPANAISENF4": [
-            null
-            ],
-            "RPPRENOMENF5": [
-            null
-            ],
-            "RPSEXENF5": [
-            null
-            ],
-            "RPANAISENF5": [
-            null
-            ],
-            "RPPRENOMENF6": [
-            null
-            ],
-            "RPSEXENF6": [
-            null
-            ],
-            "RPANAISENF6": [
-            null
-            ],
-            "RPPRENOMENF7": [
-            null
-            ],
-            "RPSEXENF7": [
-            null
-            ],
-            "RPANAISENF7": [
-            null
-            ],
-            "RPPRENOMENF8": [
-            null
-            ],
-            "RPSEXENF8": [
-            null
-            ],
-            "RPANAISENF8": [
-            null
-            ],
-            "RPPRENOMENF9": [
-            null
-            ],
-            "RPSEXENF9": [
-            null
-            ],
-            "RPANAISENF9": [
-            null
-            ],
-            "RPPRENOMENF10": [
-            null
-            ],
-            "RPSEXENF10": [
-            null
-            ],
-            "RPANAISENF10": [
-            null
-            ],
-            "RPPRENOMENF11": [
-            null
-            ],
-            "RPSEXENF11": [
-            null
-            ],
-            "RPANAISENF11": [
-            null
-            ],
-            "RPPRENOMENF12": [
-            null
-            ],
-            "RPSEXENF12": [
-            null
-            ],
-            "RPANAISENF12": [
-            null
-            ],
-            "RPPRENOMCONJ": [
-            "YYYY"
-            ],
-            "RPSEXCONJ": [
-            "1"
-            ],
-            "RPANAISCONJ": [
-            "1955"
-            ],
-            "RPPRENOMPAR1": [
-            null
-            ],
-            "RPSEXPAR1": [
-            null
-            ],
-            "RPANAISPAR1": [
-            null
-            ],
-            "RPPRENOMPAR2": [
-            null
-            ],
-            "RPSEXPAR2": [
-            null
-            ],
-            "RPANAISPAR2": [
-            null
-            ]
-        }
-    },
-    "questionnaireId": "IDCAMPAIGN",
-    "personalization": {},
-    "comment": {},
-    "stateData": {}
-    },
-    "pilotage": {
-        "address": "ADDRESS",
-        "batchNumber": 1,
-        "firstname": "",
-        "lastname": "",
-        "idCampaign": "<IDCAMPAIGN>",
-        "idContact": "xxxx",
-        "idSu": "<id>"
-    }
-    }
 
 ### Specification
 #### Adults
