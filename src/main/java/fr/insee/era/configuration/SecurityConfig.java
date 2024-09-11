@@ -49,7 +49,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable) //NOSONAR
                 .authorizeHttpRequests(authorize ->
                         authorize.requestMatchers(whiteList).permitAll()
-                                .requestMatchers("/extraction-survey-unit/**").hasRole(administrateurRPRole)
+                                .requestMatchers("/parametrage-controller/**").hasRole(administrateurRPRole)
                                 .requestMatchers("/census-extraction/**").hasRole(administrateurRPRole)
                 )
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
