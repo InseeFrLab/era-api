@@ -301,7 +301,7 @@ public abstract class CommonDAO {
     protected Map<Long, List<IndividualFormDto>> getIndividuals(List<Long> ids, JdbcTemplate jdbc) {
         String sqlIndividu = "select feuillelogement, id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, cnaie, " +
                 "pnai, sexe, " +
-                "'nai_p1' as nai_p1, 'pnai_p1' as pnai_p1, 'nai_p2' as nai_p2, 'pnai_p2' as pnai_p2, null as lienenregistre, null as individurelie " +
+                "nai_p1, pnai_p1, nai_p2, pnai_p2, null as lienenregistre, null as individurelie " +
                 "from bulletinindividuels b " +
                 "where tableauabcd = 'A' and feuillelogement in (SELECT id FROM response_id_tmp) " +
                 "order by b.feuillelogement, b.id ";
