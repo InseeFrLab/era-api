@@ -15,9 +15,7 @@ public class OmerDataSourceConfiguration {
         @Bean
         @ConfigurationProperties("spring.datasource.omer")
         public DataSourceProperties omerDataSourceProperties() {
-                DataSourceProperties con =  new DataSourceProperties();
-//                con.setType(SingleConnectionDataSource.class);
-                return con ;
+                return new DataSourceProperties();
         }
 
         @Bean

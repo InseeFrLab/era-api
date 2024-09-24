@@ -12,7 +12,7 @@ import java.sql.SQLException;
 @Slf4j
 public class BIEntityMapper implements RowMapper<BIEntity> {
 
-        BDDSource source;
+        final BDDSource source;
         public BIEntityMapper(BDDSource source){
                 this.source=source;
         }
