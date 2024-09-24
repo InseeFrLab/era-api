@@ -116,7 +116,6 @@ public class CensusCsvAdapter {
         externalLine.add(individual.getGender());
         externalLine.add(individual.getDpnaicode());
         externalLine.add(individual.getCnaif());
-        externalLine.add(individual.getCnaie());
         externalLine.add(individual.getPnai());
 
         externalLine.add(individual.getNaiP1());//RPNAIPAR1
@@ -167,7 +166,6 @@ public class CensusCsvAdapter {
         externalsHeader.add(String.format("RPSEX%s_%d", type, index));
         externalsHeader.add(String.format("RPDPNAICODE%s_%d", type, index));
         externalsHeader.add(String.format("RPCNAIF%s_%d", type, index));
-        externalsHeader.add(String.format("RPCNAIE%s_%d", type, index));
         externalsHeader.add(String.format("RPPNAI%s_%d", type, index));
         externalsHeader.add(String.format("RPNAIPAR1%s_%d", type, index));
         externalsHeader.add(String.format("RPPNAIPAR1%s_%d", type, index));

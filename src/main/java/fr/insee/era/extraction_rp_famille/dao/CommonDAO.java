@@ -299,7 +299,7 @@ public abstract class CommonDAO {
     }
 
     protected Map<Long, List<IndividualFormDto>> getIndividuals(List<Long> ids, JdbcTemplate jdbc) {
-        String sqlIndividu = "select feuillelogement, id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, cnaie, " +
+        String sqlIndividu = "select feuillelogement, id, nom, prenom, anai, mnai, jnai, dpnaicode, cnaif, " +
                 "pnai, sexe, " +
                 "nai_p1, pnai_p1, nai_p2, pnai_p2, null as lienenregistre, null as individurelie " +
                 "from bulletinindividuels b " +
@@ -379,7 +379,6 @@ public abstract class CommonDAO {
                 .birthDay((String) individualForThisFeuillelogement.get("jnai"))
                 .dpnaicode((String) individualForThisFeuillelogement.get("dpnaicode"))
                 .cnaif((String) individualForThisFeuillelogement.get("cnaif"))
-                .cnaie((String) individualForThisFeuillelogement.get("cnaie"))
                 .pnai((String) individualForThisFeuillelogement.get("pnai"))
                 .naiP1((String) individualForThisFeuillelogement.get("nai_p1"))
                 .paysNaiP1((String) individualForThisFeuillelogement.get("pnai_p1"))

@@ -22,7 +22,6 @@ public class IndividualFormDto {
     private String birthDay;
     private String dpnaicode;
     private String cnaif;
-    private String cnaie;
     private String pnai;
 
     private String naiP1;
