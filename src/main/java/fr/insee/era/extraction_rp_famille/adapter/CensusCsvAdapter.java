@@ -45,6 +45,7 @@ public class CensusCsvAdapter {
         line.add(responseNetUserDto.getResloc());
         line.add(EMPTY_STRING); //Mention spéciale
         line.add(responseNetUserDto.getCpostloc());
+        line.add(responseNetUserDto.getDepcom());
         line.add(responseNetUserDto.getCar());
         line.add(EMPTY_STRING);//NomUe
         line.add(EMPTY_STRING);//PrenomUe
@@ -129,7 +130,7 @@ public class CensusCsvAdapter {
 
     public String[] writeHeader(int maxSurveydPersons, int maxChildrenPerPerson) {
 
-        List<String> commonHeader = new ArrayList<>(Arrays.asList("IdentifiantExterne", "IdModele", "IdeC", "IdLot", "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "LibelleCommune", "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1", "whoAnswers2", "whoAnswers3", "RPLISTEPRENOMS"));
+        List<String> commonHeader = new ArrayList<>(Arrays.asList("IdentifiantExterne", "IdModele", "IdeC", "IdLot", "Civilite", "Nom", "Prenom", "AdresseMessagerie", "NumeroVoie", "IndiceRepetition", "TypeVoie", "LibelleVoie", "ComplementAdresse", "MentionSpeciale", "CodePostal", "CodeGeo", "LibelleCommune", "NomUe", "PrenomUe", "AnneeNaissanceUe", "TYPE_QUEST", "RPTYPEQUEST", "RPNBQUEST", "whoAnswers1", "whoAnswers2", "whoAnswers3", "RPLISTEPRENOMS"));
 
         List<String> externalsHeader = new ArrayList<>();
         //add externals headers
