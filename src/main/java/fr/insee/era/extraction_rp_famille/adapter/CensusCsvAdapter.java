@@ -96,6 +96,12 @@ public class CensusCsvAdapter {
             Map<Integer, IndividualFormDto> parents = responseNetUserDto.getListOfParentsByIndividual(individual);
             getExternalLine(parents.get(1)).forEach(line::add);
             getExternalLine(parents.get(2)).forEach(line::add);
+
+            // Children
+            Map<Integer,IndividualFormDto> children = responseNetUserDto.getListOfChildrenByIndividual(individual);
+            for (int j = 1; j <= BusinessConstant.MAX_CHILDREN_PER_PERSON; j++) {
+                getExternalLine(children.get(j)).forEach(line::add);
+            }
         }
 
         return line.toArray(new String[0]);

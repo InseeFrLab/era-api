@@ -67,6 +67,30 @@ public class ResponseNetUserDto {
         return parentsMap;
     }
 
+
+    public Map<Integer, IndividualFormDto> getListOfChildrenByIndividual(IndividualFormDto individual) {
+        List<Long> childrenIds = individual.getFamilyTies().stream()
+                .filter(r -> r.getRelationshipType() == RelationshipType.PARENT)
+                .map(RelationshipDto::getIdRelationship).toList();
+        List<IndividualFormDto> childrenList = individuals.stream()
+                .filter(i -> childrenIds.contains(i.getId()))
+                .sorted(Comparator.comparing(IndividualFormDto::getBirthDate))
+                .limit(BusinessConstant.MAX_CHILDREN_PER_PERSON).toList();
+
+        Map<Integer, IndividualFormDto> childrenMap = new HashMap<>();
+        //On remplit tous les enfants avec des individus vides
+        for (int i = 1; i <= BusinessConstant.MAX_CHILDREN_PER_PERSON; i++) {
+            childrenMap.put(i, IndividualFormDto.builder().build());
+        }
+        //Puis on met des vraies valeurs dans les enfants qui existent
+        for (int i = 1; i <= childrenList.size(); i++) {
+            childrenMap.put(i, childrenList.get(i - 1));
+        }
+        return childrenMap;
+    }
+
+
+
     public IndividualFormDto getConjointByIndividual(IndividualFormDto individual) {
         Optional<Long> conjointId = individual.getFamilyTies().stream()
                 .filter(r -> r.getRelationshipType() == RelationshipType.CONJOINT)
